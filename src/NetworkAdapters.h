@@ -9,19 +9,27 @@
 #include <vector>
 #pragma comment(lib, "IPHLPAPI.lib")
 
+#define WORKING_BUFFER_SIZE 15000
+#define MAX_TRIES 3
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+
 struct NetworkInterface {
-    DWORD ComboIndex;
-    char* AdapterName;
-    char* Description;
+    IF_INDEX Index;
+    PCHAR Name;
+    ULONG Length;
 };
 
 class NetworkAdapters {
     public:
         NetworkAdapters();
-        PIP_ADAPTER_INFO pAdapter;
+        std::vector<NetworkInterface> GetInterfaces();
+
+    private:
+        PIP_ADAPTER_ADDRESSES pAddresses;
         DWORD dwRetVal;
         bool Initialize();
-        std::vector<NetworkInterface> GetNetworkInterfaces();
 };
 
 #endif // NETWORKADAPTERS_H

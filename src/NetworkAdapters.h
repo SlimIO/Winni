@@ -13,7 +13,6 @@ struct NetworkInterface {
     DWORD ComboIndex;
     char* AdapterName;
     char* Description;
-    String IpAddress[16];
 };
 
 class NetworkAdapters {

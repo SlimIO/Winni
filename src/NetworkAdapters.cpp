@@ -44,7 +44,6 @@ std::vector<NetworkInterface> NetworkAdapters::GetNetworkInterfaces()
         temp.ComboIndex = pAdapter->ComboIndex;
         temp.AdapterName = pAdapter->AdapterName;
         temp.Description = pAdapter->Description;
-        temp.IpAddress = pAdapter->IpAddressList.IpAddress.String;
         printf("\tComboIndex: \t%d\n", pAdapter->ComboIndex);
         printf("\tAdapter Name: \t%s\n", pAdapter->AdapterName);
         printf("\tAdapter Desc: \t%s\n", pAdapter->Description);

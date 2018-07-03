@@ -170,3 +170,21 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
 
     return ret;
 }
+
+IfEntry NetworkAdapters::GetIf(IF_INDEX Index) {
+    MIB_IFROW ifrow;
+    ifrow.dwIndex = Index;
+    if( GetIfEntry( &ifrow ) == NO_ERROR ) {
+        IfEntry entry;
+        entry.dwInOctets = ifrow.dwInOctets;
+        entry.dwOutOctets = ifrow.dwOutOctets;
+        return entry;
+    }
+    else {
+        printf("Could not open default interface !\n");
+        IfEntry entry;
+        entry.dwInOctets = 0;
+        entry.dwOutOctets = 0;
+        return entry;
+    }
+}

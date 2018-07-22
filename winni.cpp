@@ -20,7 +20,6 @@ using namespace std;
 // }
 
 napi_value GetInterfaces(napi_env env, napi_callback_info info) {
-    // 
     napi_status status;
     napi_value networkproviders;
 

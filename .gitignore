@@ -32,3 +32,5 @@
 *.app
 
 node_modules
+build
+!build/config.gypi

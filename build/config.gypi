@@ -5,24 +5,23 @@
     "default_configuration": "Release",
     "defines": [],
     "include_dirs": [],
-    "libraries": [],
-    "msbuild_toolset": "v141",
-    "msvs_windows_target_platform_version": "10.0.16299.0"
+    "libraries": []
   },
   "variables": {
     "asan": 0,
     "build_v8_with_gn": "false",
     "coverage": "false",
     "debug_nghttp2": "false",
+    "enable_lto": "false",
     "force_dynamic_crt": 0,
     "host_arch": "x64",
-    "icu_data_in": "..\\..\\deps/icu-small\\source/data/in\\icudt61l.dat",
+    "icu_data_in": "..\\..\\deps/icu-small\\source/data/in\\icudt62l.dat",
     "icu_endianness": "l",
     "icu_gyp_path": "tools/icu/icu-generic.gyp",
     "icu_locales": "en,root",
     "icu_path": "deps/icu-small",
     "icu_small": "true",
-    "icu_ver_major": "61",
+    "icu_ver_major": "62",
     "nasm_version": "2.13",
     "node_byteorder": "little",
     "node_debug_lib": "false",
@@ -48,6 +47,7 @@
     "node_use_openssl": "true",
     "node_use_perfctr": "true",
     "node_use_v8_platform": "true",
+    "node_with_ltcg": "true",
     "node_without_node_options": "false",
     "openssl_fips": "",
     "openssl_no_asm": 0,
@@ -64,8 +64,8 @@
     "v8_typed_array_max_size_in_heap": 0,
     "v8_use_snapshot": "true",
     "want_separate_host_toolset": 0,
-    "nodedir": "C:\\Users\\tgent\\.node-gyp\\10.4.1",
-    "standalone_static_library": 1,
-    "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+    "nodedir": "C:\\Users\\tgent\\.node-gyp\\10.7.0",
+    "copy_dev_lib": "true",
+    "standalone_static_library": 1
   }
 }

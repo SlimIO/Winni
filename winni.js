@@ -1,5 +1,4 @@
-const addon = require('bindings')('winni');
+const winni = require("./build/Release/winni.node");
 
-console.log(addon);
 console.log("interfaces :");
-console.log(addon.getInterfaces());
+console.log(winni.getInterfaces());

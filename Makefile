@@ -1,2 +1,10 @@
-main: main.cpp
-	cl /EHsc winni.cpp src/NetworkAdapters.cpp /I include
+.PHONY: install
+
+install:
+	npm install
+
+configure: install
+	npx node-gyp configure
+
+build: configure
+	npx node-gyp build

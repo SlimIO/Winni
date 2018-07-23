@@ -26,29 +26,29 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
     status = napi_create_array(env, &networkproviders);
     assert(status == napi_ok);
 
-    NetworkAdapters Adapters;
-    std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
-    for (int i = 0; i < vInterfaces.size(); i++) {
-        NetworkInterface Interface = vInterfaces[i];
-        napi_value nInterface;
+    // NetworkAdapters Adapters;
+    // std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
+    // for (int i = 0; i < vInterfaces.size(); i++) {
+    //     NetworkInterface Interface = vInterfaces[i];
+    //     napi_value nInterface;
 
-        status = napi_create_object(env, &nInterface);
-        assert(status == napi_ok);
+    //     status = napi_create_object(env, &nInterface);
+    //     assert(status == napi_ok);
 
-        napi_value interfaceName;
-        status = napi_create_string_utf8(env, std::string(Interface.Name).c_str(), 10, &interfaceName);
-        assert(status == napi_ok);
+    //     napi_value interfaceName;
+    //     status = napi_create_string_utf8(env, std::string(Interface.Name).c_str(), 10, &interfaceName);
+    //     assert(status == napi_ok);
 
-        status = napi_set_named_property(env, nInterface, "name", interfaceName);
-        assert(status == napi_ok);
+    //     status = napi_set_named_property(env, nInterface, "name", interfaceName);
+    //     assert(status == napi_ok);
 
-        napi_value index;
-        status = napi_create_int32(env, i, &index);
-        assert(status == napi_ok);
+    //     napi_value index;
+    //     status = napi_create_int32(env, i, &index);
+    //     assert(status == napi_ok);
 
-        status = napi_set_property(env, networkproviders, index, nInterface);
-        assert(status == napi_ok);
-    };
+    //     status = napi_set_property(env, networkproviders, index, nInterface);
+    //     assert(status == napi_ok);
+    // };
 
     return networkproviders;
 }

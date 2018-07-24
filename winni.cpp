@@ -21,36 +21,48 @@ using namespace std;
 
 napi_value GetInterfaces(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value networkproviders;
+    NetworkAdapters Adapters;
 
-    status = napi_create_array(env, &networkproviders);
+    // Create JavaScript Array
+    napi_value ArrayRet;
+    status = napi_create_array(env, &ArrayRet);
     assert(status == napi_ok);
 
-    // NetworkAdapters Adapters;
-    // std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
-    // for (int i = 0; i < vInterfaces.size(); i++) {
-    //     NetworkInterface Interface = vInterfaces[i];
-    //     napi_value nInterface;
+    try {
+        // Retrieve interfaces
+        std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
+        for (int i = 0; i < vInterfaces.size(); i++) {
+            NetworkInterface Interface = vInterfaces[i];
 
-    //     status = napi_create_object(env, &nInterface);
-    //     assert(status == napi_ok);
+            // Create JavaScript Object
+            napi_value JSInterfaceObject;
+            status = napi_create_object(env, &JSInterfaceObject);
+            assert(status == napi_ok);
 
-    //     napi_value interfaceName;
-    //     status = napi_create_string_utf8(env, std::string(Interface.Name).c_str(), 10, &interfaceName);
-    //     assert(status == napi_ok);
+            napi_value interfaceUTF8StringName;
+            std::string interfaceName = std::string(Interface.Name);
+            status = napi_create_string_utf8(env, interfaceName.c_str(), interfaceName.length(), &interfaceUTF8StringName);
+            assert(status == napi_ok);
 
-    //     status = napi_set_named_property(env, nInterface, "name", interfaceName);
-    //     assert(status == napi_ok);
+            status = napi_set_named_property(env, JSInterfaceObject, "name", interfaceUTF8StringName);
+            assert(status == napi_ok);
 
-    //     napi_value index;
-    //     status = napi_create_int32(env, i, &index);
-    //     assert(status == napi_ok);
+            napi_value index;
+            status = napi_create_int32(env, i, &index);
+            assert(status == napi_ok);
 
-    //     status = napi_set_property(env, networkproviders, index, nInterface);
-    //     assert(status == napi_ok);
-    // };
+            status = napi_set_property(env, ArrayRet, index, JSInterfaceObject);
+            assert(status == napi_ok);
+        };
+    }
+    catch(...) {
+        const napi_extended_error_info *errorInfo = 0;
+        napi_get_last_error_info(env, &errorInfo);
+        napi_throw_error(env, "ERR", errorInfo->error_message);
+        return NULL;
+    }
 
-    return networkproviders;
+    return ArrayRet;
 }
 
 #define DECLARE_NAPI_METHOD(name, func)                          \

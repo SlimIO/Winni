@@ -73,21 +73,24 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
     pCurrAddresses = pAddresses;
     while (pCurrAddresses) {
         NetworkInterface Interface;
-        Interface.Index     = pCurrAddresses->IfIndex;
-        Interface.Name      = std::string(pCurrAddresses->AdapterName);
-        Interface.Length    = pCurrAddresses->Length;
-        Interface.DnsSuffix = toChar(pCurrAddresses->DnsSuffix);
-        Interface.Description = toChar(pCurrAddresses->Description);
-        Interface.FriendlyName = toChar(pCurrAddresses->FriendlyName);
+        Interface.IfIndex       = (double) pCurrAddresses->IfIndex;
+        Interface.IfType        = (double) pCurrAddresses->IfType;
+        Interface.Name          = std::string(pCurrAddresses->AdapterName).c_str();
+        Interface.Length        = (double) pCurrAddresses->Length;
+        Interface.DnsSuffix     = toChar(pCurrAddresses->DnsSuffix);
+        Interface.Description   = toChar(pCurrAddresses->Description);
+        Interface.FriendlyName  = toChar(pCurrAddresses->FriendlyName);
+        Interface.Flags         = (double) pCurrAddresses->Flags;
+        Interface.Mtu           = (double) pCurrAddresses->Mtu;
+        Interface.OperStatus    = (double) pCurrAddresses->OperStatus;
+        Interface.TransmitLinkSpeed = (double) pCurrAddresses->TransmitLinkSpeed;
+        Interface.ReceiveLinkSpeed = (double) pCurrAddresses->ReceiveLinkSpeed;
+        Interface.Ipv4Enabled   = (double) pCurrAddresses->Ipv4Enabled;
+        Interface.Ipv6Enabled   = (double) pCurrAddresses->Ipv6Enabled;
+        Interface.Ipv6IfIndex   = (double) pCurrAddresses->Ipv6IfIndex;
 
-        printf("\tLength of the IP_ADAPTER_ADDRESS struct: %ld\n", pCurrAddresses->Length);
-        printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
-
-        printf("\tFlags: %ld\n", pCurrAddresses->Flags);
-        printf("\tMtu: %lu\n", pCurrAddresses->Mtu);
-        printf("\tIfType: %ld\n", pCurrAddresses->IfType);
-        printf("\tOperStatus: %ld\n", pCurrAddresses->OperStatus);
-        printf("\n");
+        // printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
+        // printf("\n");
 
         ret.push_back(Interface);
 
@@ -147,15 +150,11 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         //     }
         // }
 
-        // printf("\tIpv6IfIndex (IPv6 interface): %u\n", pCurrAddresses->Ipv6IfIndex);
         // printf("\tZoneIndices (hex): ");
         // for (i = 0; i < 16; i++) {
         //     printf("%lx ", pCurrAddresses->ZoneIndices[i]);
         // }
         // printf("\n");
-
-        // printf("\tTransmit link speed: %I64u\n", pCurrAddresses->TransmitLinkSpeed);
-        // printf("\tReceive link speed: %I64u\n", pCurrAddresses->ReceiveLinkSpeed);
 
         // pPrefix = pCurrAddresses->FirstPrefix;
         // if (pPrefix) {

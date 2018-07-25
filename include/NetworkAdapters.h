@@ -17,13 +17,21 @@
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
 struct NetworkInterface {
-    IF_INDEX Index;
-    std::string Name;
-    ULONG Length;
+    double IfIndex;
+    double IfType;
+    const char* Name;
+    double Length;
     char* DnsSuffix;
     char* Description;
     char* FriendlyName;
-    std::string Flags;
+    double Flags;
+    double Mtu;
+    double OperStatus;
+    double TransmitLinkSpeed;
+    double ReceiveLinkSpeed;
+    double Ipv4Enabled;
+    double Ipv6Enabled;
+    double Ipv6IfIndex;
 };
 
 struct IfEntry {

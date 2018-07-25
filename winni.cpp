@@ -5,19 +5,25 @@
 #include "assert.h"
 using namespace std;
 
-// void main() {
-//     printf("Start main\n");
-//     NetworkAdapters Adapters;
-//     printf("Get interfaces...\n");
-//     std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
-//     for (int i = 0; i < vInterfaces.size(); i++) {
-//         NetworkInterface Interface = vInterfaces[i];
-//         printf("\tAdapter name: %s\n", Interface.Name);
+void addDoubleProperty(napi_env env, napi_value JSObject, char* fieldName, double fieldValue) {
+    napi_value doubleNAPIValue;
+    napi_status status;
+    status = napi_create_double(env, fieldValue, &doubleNAPIValue);
+    assert(status == napi_ok);
 
-//         IfEntry ifInfo = Adapters.GetIf(Interface.Index);
-//         printf("\tdwOutOctets: %s Octets\n", to_string(ifInfo.dwOutOctets).c_str());
-//     }
-// }
+    status = napi_set_named_property(env, JSObject, fieldName, doubleNAPIValue);
+    assert(status == napi_ok);
+}
+
+void addCharProperty(napi_env env, napi_value JSObject, char* fieldName, char* fieldValue) {
+    napi_value charNAPIValue;
+    napi_status status;
+    status = napi_create_string_utf8(env, fieldValue, strlen(fieldValue), &charNAPIValue);
+    assert(status == napi_ok);
+
+    status = napi_set_named_property(env, JSObject, fieldName, charNAPIValue);
+    assert(status == napi_ok);
+}
 
 napi_value GetInterfaces(napi_env env, napi_callback_info info) {
     napi_status status;
@@ -39,38 +45,24 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             status = napi_create_object(env, &JSInterfaceObject);
             assert(status == napi_ok);
 
-            /** Setup NAME property */
-            napi_value interfaceUTF8StringName;
-            status = napi_create_string_utf8(env, Interface.Name.c_str(), Interface.Name.length(), &interfaceUTF8StringName);
-            assert(status == napi_ok);
+            /** Setup Properties */
+            addDoubleProperty(env, JSInterfaceObject, "IfIndex", Interface.IfIndex);
+            addDoubleProperty(env, JSInterfaceObject, "IfType", Interface.IfType);
+            addCharProperty(env, JSInterfaceObject, "Name", (char*) Interface.Name);
+            addCharProperty(env, JSInterfaceObject, "DnsSuffix", Interface.DnsSuffix);
+            addCharProperty(env, JSInterfaceObject, "Description", Interface.Description);
+            addCharProperty(env, JSInterfaceObject, "FriendlyName", Interface.FriendlyName);
+            addDoubleProperty(env, JSInterfaceObject, "Flags", Interface.Flags);
+            addDoubleProperty(env, JSInterfaceObject, "Length", Interface.Length);
+            addDoubleProperty(env, JSInterfaceObject, "Mtu", Interface.Mtu);
+            addDoubleProperty(env, JSInterfaceObject, "OperStatus", Interface.OperStatus);
+            addDoubleProperty(env, JSInterfaceObject, "ReceiveLinkSpeed", Interface.ReceiveLinkSpeed);
+            addDoubleProperty(env, JSInterfaceObject, "TransmitLinkSpeed", Interface.TransmitLinkSpeed);
+            addDoubleProperty(env, JSInterfaceObject, "Ipv4Enabled", Interface.Ipv4Enabled);
+            addDoubleProperty(env, JSInterfaceObject, "Ipv6Enabled", Interface.Ipv6Enabled);
+            addDoubleProperty(env, JSInterfaceObject, "Ipv6IfIndex", Interface.Ipv6IfIndex);
 
-            status = napi_set_named_property(env, JSInterfaceObject, "Name", interfaceUTF8StringName);
-            assert(status == napi_ok);
-
-            /** Setup DnsSuffix property */
-            napi_value dnsSuffixUTF8String;
-            status = napi_create_string_utf8(env, Interface.DnsSuffix, strlen(Interface.DnsSuffix), &dnsSuffixUTF8String);
-            assert(status == napi_ok);
-
-            status = napi_set_named_property(env, JSInterfaceObject, "DnsSuffix", dnsSuffixUTF8String);
-            assert(status == napi_ok);
-
-            /** Setup Description property */
-            napi_value descriptionUTF8String;
-            status = napi_create_string_utf8(env, Interface.Description, strlen(Interface.Description), &descriptionUTF8String);
-            assert(status == napi_ok);
-
-            status = napi_set_named_property(env, JSInterfaceObject, "Description", descriptionUTF8String);
-            assert(status == napi_ok);
-
-            /** Setup FriendlyName property */
-            napi_value friendlyNameUTF8String;
-            status = napi_create_string_utf8(env, Interface.FriendlyName, strlen(Interface.FriendlyName), &friendlyNameUTF8String);
-            assert(status == napi_ok);
-
-            status = napi_set_named_property(env, JSInterfaceObject, "FriendlyName", friendlyNameUTF8String);
-            assert(status == napi_ok);
-
+            /** Create array entry **/
             napi_value index;
             status = napi_create_int32(env, i, &index);
             assert(status == napi_ok);

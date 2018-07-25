@@ -54,6 +54,7 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
     DWORD dwSize = 0;
     unsigned int i = 0;
     LPVOID lpMsgBuf = NULL;
+    MIB_IFROW ifrow;
 
     PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
     PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
@@ -88,6 +89,16 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         Interface.Ipv4Enabled   = (double) pCurrAddresses->Ipv4Enabled;
         Interface.Ipv6Enabled   = (double) pCurrAddresses->Ipv6Enabled;
         Interface.Ipv6IfIndex   = (double) pCurrAddresses->Ipv6IfIndex;
+
+        ifrow.dwIndex = pCurrAddresses->IfIndex;
+        if( GetIfEntry( &ifrow ) != NO_ERROR ) {
+            Interface.dwOutOctets = 0;
+            Interface.dwInOctets = 0;
+        }
+        else {
+            Interface.dwOutOctets = (double) ifrow.dwOutOctets;
+            Interface.dwInOctets = (double) ifrow.dwInOctets;
+        }
 
         // printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
         // printf("\n");

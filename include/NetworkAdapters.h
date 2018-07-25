@@ -32,6 +32,8 @@ struct NetworkInterface {
     double Ipv4Enabled;
     double Ipv6Enabled;
     double Ipv6IfIndex;
+    double dwOutOctets;
+    double dwInOctets;
 };
 
 struct IfEntry {

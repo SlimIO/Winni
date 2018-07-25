@@ -61,6 +61,8 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             addDoubleProperty(env, JSInterfaceObject, "Ipv4Enabled", Interface.Ipv4Enabled);
             addDoubleProperty(env, JSInterfaceObject, "Ipv6Enabled", Interface.Ipv6Enabled);
             addDoubleProperty(env, JSInterfaceObject, "Ipv6IfIndex", Interface.Ipv6IfIndex);
+            addDoubleProperty(env, JSInterfaceObject, "dwOutOctets", Interface.dwOutOctets);
+            addDoubleProperty(env, JSInterfaceObject, "dwInOctets", Interface.dwInOctets);
 
             /** Create array entry **/
             napi_value index;

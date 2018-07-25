@@ -1,4 +1,4 @@
-.PHONY: install
+.PHONY: install build
 
 install:
 	npm install
@@ -6,5 +6,5 @@ install:
 configure: install
 	npx node-gyp configure
 
-build: configure
+build:
 	npx node-gyp build

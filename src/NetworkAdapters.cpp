@@ -37,6 +37,13 @@ bool NetworkAdapters::Initialize()
     return true;
 }
 
+char* NetworkAdapters::toChar(PWCHAR field) {
+    size_t len = wcslen(field) + 1;
+    char* CHARField = new char[len];
+    wcstombs(CHARField, field, len);
+    return CHARField;
+}
+
 std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
     std::vector<NetworkInterface> ret;
     bool isInitialized = Initialize();
@@ -63,17 +70,26 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         }
         return ret;
     }
-
     pCurrAddresses = pAddresses;
     while (pCurrAddresses) {
         NetworkInterface Interface;
         Interface.Index     = pCurrAddresses->IfIndex;
-        Interface.Name      = pCurrAddresses->AdapterName;
+        Interface.Name      = std::string(pCurrAddresses->AdapterName);
         Interface.Length    = pCurrAddresses->Length;
+        Interface.DnsSuffix = toChar(pCurrAddresses->DnsSuffix);
+        Interface.Description = toChar(pCurrAddresses->Description);
+        Interface.FriendlyName = toChar(pCurrAddresses->FriendlyName);
+
+        printf("\tLength of the IP_ADAPTER_ADDRESS struct: %ld\n", pCurrAddresses->Length);
+        printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
+
+        printf("\tFlags: %ld\n", pCurrAddresses->Flags);
+        printf("\tMtu: %lu\n", pCurrAddresses->Mtu);
+        printf("\tIfType: %ld\n", pCurrAddresses->IfType);
+        printf("\tOperStatus: %ld\n", pCurrAddresses->OperStatus);
+        printf("\n");
+
         ret.push_back(Interface);
-        // printf("\tLength of the IP_ADAPTER_ADDRESS struct: %ld\n", pCurrAddresses->Length);
-        // printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
-        // printf("\tAdapter name: %s\n", pCurrAddresses->AdapterName);
 
         // pUnicast = pCurrAddresses->FirstUnicastAddress;
         // if (pUnicast != NULL) {
@@ -119,10 +135,6 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         //     printf("\tNo DNS Server Addresses\n");
         // }
 
-        // printf("\tDNS Suffix: %wS\n", pCurrAddresses->DnsSuffix);
-        // printf("\tDescription: %wS\n", pCurrAddresses->Description);
-        // printf("\tFriendly name: %wS\n", pCurrAddresses->FriendlyName);
-
         // if (pCurrAddresses->PhysicalAddressLength != 0) {
         //     printf("\tPhysical address: ");
         //     for (i = 0; i < (int) pCurrAddresses->PhysicalAddressLength; i++) {
@@ -134,10 +146,7 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         //         }
         //     }
         // }
-        // printf("\tFlags: %ld\n", pCurrAddresses->Flags);
-        // printf("\tMtu: %lu\n", pCurrAddresses->Mtu);
-        // printf("\tIfType: %ld\n", pCurrAddresses->IfType);
-        // printf("\tOperStatus: %ld\n", pCurrAddresses->OperStatus);
+
         // printf("\tIpv6IfIndex (IPv6 interface): %u\n", pCurrAddresses->Ipv6IfIndex);
         // printf("\tZoneIndices (hex): ");
         // for (i = 0; i < 16; i++) {
@@ -158,8 +167,6 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         // else {
         //     printf("\tNumber of IP Adapter Prefix entries: 0\n");
         // }
-
-        // printf("\n");
 
         pCurrAddresses = pCurrAddresses->Next;
     }

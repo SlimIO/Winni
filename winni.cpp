@@ -30,7 +30,7 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
 
     try {
         // Retrieve interfaces
-        std::vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
+        vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
         for (int i = 0; i < vInterfaces.size(); i++) {
             NetworkInterface Interface = vInterfaces[i];
 
@@ -39,12 +39,36 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             status = napi_create_object(env, &JSInterfaceObject);
             assert(status == napi_ok);
 
+            /** Setup NAME property */
             napi_value interfaceUTF8StringName;
-            std::string interfaceName = std::string(Interface.Name);
-            status = napi_create_string_utf8(env, interfaceName.c_str(), interfaceName.length(), &interfaceUTF8StringName);
+            status = napi_create_string_utf8(env, Interface.Name.c_str(), Interface.Name.length(), &interfaceUTF8StringName);
             assert(status == napi_ok);
 
-            status = napi_set_named_property(env, JSInterfaceObject, "name", interfaceUTF8StringName);
+            status = napi_set_named_property(env, JSInterfaceObject, "Name", interfaceUTF8StringName);
+            assert(status == napi_ok);
+
+            /** Setup DnsSuffix property */
+            napi_value dnsSuffixUTF8String;
+            status = napi_create_string_utf8(env, Interface.DnsSuffix, strlen(Interface.DnsSuffix), &dnsSuffixUTF8String);
+            assert(status == napi_ok);
+
+            status = napi_set_named_property(env, JSInterfaceObject, "DnsSuffix", dnsSuffixUTF8String);
+            assert(status == napi_ok);
+
+            /** Setup Description property */
+            napi_value descriptionUTF8String;
+            status = napi_create_string_utf8(env, Interface.Description, strlen(Interface.Description), &descriptionUTF8String);
+            assert(status == napi_ok);
+
+            status = napi_set_named_property(env, JSInterfaceObject, "Description", descriptionUTF8String);
+            assert(status == napi_ok);
+
+            /** Setup FriendlyName property */
+            napi_value friendlyNameUTF8String;
+            status = napi_create_string_utf8(env, Interface.FriendlyName, strlen(Interface.FriendlyName), &friendlyNameUTF8String);
+            assert(status == napi_ok);
+
+            status = napi_set_named_property(env, JSInterfaceObject, "FriendlyName", friendlyNameUTF8String);
             assert(status == napi_ok);
 
             napi_value index;
@@ -56,9 +80,16 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
         };
     }
     catch(...) {
-        const napi_extended_error_info *errorInfo = 0;
-        napi_get_last_error_info(env, &errorInfo);
-        napi_throw_error(env, "ERR", errorInfo->error_message);
+        bool result = false;
+        napi_is_exception_pending(env, &result);
+        if (result) {
+            const napi_extended_error_info *errorInfo = 0;
+            napi_get_last_error_info(env, &errorInfo);
+            napi_throw_error(env, "ERR", errorInfo->error_message);
+        }
+        else {
+            napi_throw_error(env, "ERR", "Unknow error!");
+        }
         return NULL;
     }
 

@@ -61,8 +61,6 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             addDoubleProperty(env, JSInterfaceObject, "Ipv4Enabled", Interface.Ipv4Enabled);
             addDoubleProperty(env, JSInterfaceObject, "Ipv6Enabled", Interface.Ipv6Enabled);
             addDoubleProperty(env, JSInterfaceObject, "Ipv6IfIndex", Interface.Ipv6IfIndex);
-            addDoubleProperty(env, JSInterfaceObject, "dwOutOctets", Interface.dwOutOctets);
-            addDoubleProperty(env, JSInterfaceObject, "dwInOctets", Interface.dwInOctets);
 
             /** Create array entry **/
             napi_value index;
@@ -90,13 +88,59 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
     return ArrayRet;
 }
 
+napi_value GetIfEntry(napi_env env, napi_callback_info info) {
+    napi_status status;
+
+    // Retrieve args
+    size_t argc = 1;
+    napi_value args[1];
+    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    assert(status == napi_ok);
+
+    // Check arguments length
+    if (argc < 1) {
+        napi_throw_type_error(env, nullptr, "Wrong number of arguments");
+        return nullptr;
+    }
+
+    // Get typeof of first arg
+    napi_valuetype ifIndexNAPIType;
+    status = napi_typeof(env, args[0], &ifIndexNAPIType);
+    assert(status == napi_ok);
+
+    if (ifIndexNAPIType != napi_number) {
+        napi_throw_type_error(env, nullptr, "Wrong arguments");
+        return nullptr;
+    }
+
+    double ifIndex;
+    status = napi_get_value_double(env, args[0], &ifIndex);
+    assert(status == napi_ok);
+
+    NetworkAdapters Adapters;
+    IfEntry ifEntry = Adapters.GetIf((IF_INDEX) ifIndex);
+    
+    // Create JavaScript Object
+    napi_value JSInterfaceObject;
+    status = napi_create_object(env, &JSInterfaceObject);
+    assert(status == napi_ok);
+
+    addDoubleProperty(env, JSInterfaceObject, "dwOutOctets", ifEntry.dwOutOctets);
+    addDoubleProperty(env, JSInterfaceObject, "dwInOctets", ifEntry.dwInOctets);
+
+    return JSInterfaceObject;
+}
+
 #define DECLARE_NAPI_METHOD(name, func)                          \
   { name, 0, func, 0, 0, 0, napi_default, 0 }
 
 napi_value Init(napi_env env, napi_value exports) {
     napi_status status;
-    napi_property_descriptor desc = DECLARE_NAPI_METHOD("getInterfaces", GetInterfaces);
-    status = napi_define_properties(env, exports, 1, &desc);
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_METHOD("getInterfaces", GetInterfaces),
+        DECLARE_NAPI_METHOD("getIfEntry", GetIfEntry)
+    };
+    status = napi_define_properties(env, exports, sizeof(desc) / sizeof(*desc), desc);
     assert(status == napi_ok);
     return exports;
 }

@@ -54,7 +54,7 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
         status = napi_create_int32(env, i, &index);
         assert(status == napi_ok);
 
-        status = napi_set_property(env, JSInterfaceArray, index, JSInterfaceObject.self);
+        status = napi_set_property(env, JSInterfaceArray, index, JSInterfaceObject.getSelf());
         assert(status == napi_ok);
     };
 

@@ -3,7 +3,7 @@
 install:
 	npm install
 
-configure: install
+configure:
 	npx node-gyp configure
 
 build:

@@ -1,9 +1,7 @@
 #include "JavaScriptObject.h"
 
 JavaScriptObject::JavaScriptObject(napi_env env) {
-    napi_status status;
-    napi_value self;
-    napi_env env = env;
+    this->env = env;
     status = napi_create_object(env, &self);
     assert(status == napi_ok);
 }
@@ -36,4 +34,8 @@ void JavaScriptObject::addBool(char* fieldName, bool fieldValue) {
 
     status = napi_set_named_property(env, self, fieldName, boolNAPIValue);
     assert(status == napi_ok);
+}
+
+napi_value JavaScriptObject::getSelf() {
+    return this->self;
 }

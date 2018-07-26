@@ -13,9 +13,16 @@ declare namespace Winni {
         OperStatus: number;
         TransmitLinkSpeed: number;
         ReceiveLinkSpeed: number;
-        Ipv4Enabled: number;
-        Ipv6Enabled: number;
+        Ipv4Enabled: boolean;
+        Ipv6Enabled: boolean;
         Ipv6IfIndex: number;
+        DdnsEnabled: boolean;
+        RegisterAdapterSuffix: number;
+        ReceiveOnly: boolean;
+        NoMulticast: boolean;
+        Ipv6OtherStatefulConfig: boolean;
+        NetbiosOverTcpipEnabled: boolean;
+        Ipv6ManagedAddressConfigurationSupported: boolean;
     }
 
     interface IfEntry {

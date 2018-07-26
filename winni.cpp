@@ -5,6 +5,9 @@
 #include "assert.h"
 using namespace std;
 
+/**
+ * Add a double property in a JavaScript Object
+ */
 void addDoubleProperty(napi_env env, napi_value JSObject, char* fieldName, double fieldValue) {
     napi_value doubleNAPIValue;
     napi_status status;
@@ -15,6 +18,9 @@ void addDoubleProperty(napi_env env, napi_value JSObject, char* fieldName, doubl
     assert(status == napi_ok);
 }
 
+/**
+ * Add a Char (string) property in a JavaScript Object
+ */
 void addCharProperty(napi_env env, napi_value JSObject, char* fieldName, char* fieldValue) {
     napi_value charNAPIValue;
     napi_status status;
@@ -22,6 +28,19 @@ void addCharProperty(napi_env env, napi_value JSObject, char* fieldName, char* f
     assert(status == napi_ok);
 
     status = napi_set_named_property(env, JSObject, fieldName, charNAPIValue);
+    assert(status == napi_ok);
+}
+
+/**
+ * Add a Boolean property in a JavaScript Object
+ */
+void addBooleanProperty(napi_env env, napi_value JSObject, char* fieldName, bool fieldValue) {
+    napi_value boolNAPIValue;
+    napi_status status;
+    status = napi_get_boolean(env, fieldValue, &boolNAPIValue);
+    assert(status == napi_ok);
+
+    status = napi_set_named_property(env, JSObject, fieldName, boolNAPIValue);
     assert(status == napi_ok);
 }
 
@@ -59,9 +78,16 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             addDoubleProperty(env, JSInterfaceObject, "OperStatus", Interface.OperStatus);
             addDoubleProperty(env, JSInterfaceObject, "ReceiveLinkSpeed", Interface.ReceiveLinkSpeed);
             addDoubleProperty(env, JSInterfaceObject, "TransmitLinkSpeed", Interface.TransmitLinkSpeed);
-            addDoubleProperty(env, JSInterfaceObject, "Ipv4Enabled", Interface.Ipv4Enabled);
-            addDoubleProperty(env, JSInterfaceObject, "Ipv6Enabled", Interface.Ipv6Enabled);
+            addBooleanProperty(env, JSInterfaceObject, "Ipv4Enabled", Interface.Ipv4Enabled == 1 ? true : false );
+            addBooleanProperty(env, JSInterfaceObject, "Ipv6Enabled", Interface.Ipv6Enabled == 1 ? true : false );
             addDoubleProperty(env, JSInterfaceObject, "Ipv6IfIndex", Interface.Ipv6IfIndex);
+            addBooleanProperty(env, JSInterfaceObject, "DdnsEnabled", Interface.DdnsEnabled == 1 ? true : false );
+            addDoubleProperty(env, JSInterfaceObject, "RegisterAdapterSuffix", Interface.RegisterAdapterSuffix);
+            addBooleanProperty(env, JSInterfaceObject, "ReceiveOnly", Interface.ReceiveOnly == 1 ? true : false );
+            addBooleanProperty(env, JSInterfaceObject, "NoMulticast", Interface.NoMulticast == 1 ? true : false );
+            addBooleanProperty(env, JSInterfaceObject, "Ipv6OtherStatefulConfig", Interface.Ipv6OtherStatefulConfig == 1 ? true : false );
+            addBooleanProperty(env, JSInterfaceObject, "NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
+            addBooleanProperty(env, JSInterfaceObject, "Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
 
             /** Create array entry **/
             napi_value index;

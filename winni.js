@@ -6,7 +6,7 @@ const networkInterfaces = winni.getInterfaces();
 console.timeEnd("getInterfaces"); 
 
 for (const interface of networkInterfaces) {
-    console.log(`Interface Name => ${interface.Name}`);
+    console.log(interface);
     console.log(winni.getIfEntry(interface.IfIndex));
     console.log("----------\n");
 }

@@ -88,6 +88,13 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         Interface.Ipv4Enabled   = (double) pCurrAddresses->Ipv4Enabled;
         Interface.Ipv6Enabled   = (double) pCurrAddresses->Ipv6Enabled;
         Interface.Ipv6IfIndex   = (double) pCurrAddresses->Ipv6IfIndex;
+        Interface.DdnsEnabled   = (double) pCurrAddresses->DdnsEnabled;
+        Interface.RegisterAdapterSuffix = (double) pCurrAddresses->RegisterAdapterSuffix;
+        Interface.ReceiveOnly   = (double) pCurrAddresses->ReceiveOnly;
+        Interface.NoMulticast   = (double) pCurrAddresses->NoMulticast;
+        Interface.Ipv6OtherStatefulConfig = (double) pCurrAddresses->Ipv6OtherStatefulConfig;
+        Interface.NetbiosOverTcpipEnabled = (double) pCurrAddresses->NetbiosOverTcpipEnabled;
+        Interface.Ipv6ManagedAddressConfigurationSupported = (double) pCurrAddresses->Ipv6ManagedAddressConfigurationSupported;
 
         int PhysicalAddressLength = (int) pCurrAddresses->PhysicalAddressLength;
         if (PhysicalAddressLength != 0) {

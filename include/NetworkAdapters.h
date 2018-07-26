@@ -24,6 +24,7 @@ struct NetworkInterface {
     char* DnsSuffix;
     char* Description;
     char* FriendlyName;
+    char* PhysicalAddress;
     double Flags;
     double Mtu;
     double OperStatus;
@@ -37,6 +38,18 @@ struct NetworkInterface {
 struct IfEntry {
     double dwOutOctets;
     double dwInOctets;
+    double dwInDiscards;
+    double dwInErrors;
+    double dwOutDiscards;
+    double dwOutErrors;
+    double dwSpeed;
+    double dwLastChange;
+    double dwInNUcastPkts;
+    double dwInUcastPkts;
+    double dwOutNUcastPkts;
+    double dwOutUcastPkts;
+    double dwOutQLen;
+    double dwInUnknownProtos;
 };
 
 class NetworkAdapters {

@@ -89,83 +89,78 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         Interface.Ipv6Enabled   = (double) pCurrAddresses->Ipv6Enabled;
         Interface.Ipv6IfIndex   = (double) pCurrAddresses->Ipv6IfIndex;
 
-        // printf("\tIfIndex (IPv4 interface): %u\n", pCurrAddresses->IfIndex);
-        // printf("\n");
+        int PhysicalAddressLength = (int) pCurrAddresses->PhysicalAddressLength;
+        if (PhysicalAddressLength != 0) {
+            std::string PhysicalAddress((char *) pCurrAddresses->PhysicalAddress);
+            Interface.PhysicalAddress = (char *) PhysicalAddress.c_str();
+        }
+        else {
+            Interface.PhysicalAddress = "";
+        }
 
         ret.push_back(Interface);
 
-        // pUnicast = pCurrAddresses->FirstUnicastAddress;
-        // if (pUnicast != NULL) {
-        //     for (i = 0; pUnicast != NULL; i++) {
-        //         pUnicast = pUnicast->Next;
-        //     }
-        //     printf("\tNumber of Unicast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Unicast Addresses\n");
-        // }
+        pUnicast = pCurrAddresses->FirstUnicastAddress;
+        if (pUnicast != NULL) {
+            for (i = 0; pUnicast != NULL; i++) {
+                pUnicast = pUnicast->Next;
+            }
+            printf("\tNumber of Unicast Addresses: %d\n", i);
+        } 
+        else {
+            printf("\tNo Unicast Addresses\n");
+        }
 
-        // pAnycast = pCurrAddresses->FirstAnycastAddress;
-        // if (pAnycast) {
-        //     for (i = 0; pAnycast != NULL; i++) {
-        //         pAnycast = pAnycast->Next;
-        //     }
-        //     printf("\tNumber of Anycast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Anycast Addresses\n");
-        // }
+        pAnycast = pCurrAddresses->FirstAnycastAddress;
+        if (pAnycast) {
+            for (i = 0; pAnycast != NULL; i++) {
+                pAnycast = pAnycast->Next;
+            }
+            printf("\tNumber of Anycast Addresses: %d\n", i);
+        } 
+        else {
+            printf("\tNo Anycast Addresses\n");
+        }
 
-        // pMulticast = pCurrAddresses->FirstMulticastAddress;
-        // if (pMulticast) {
-        //     for (i = 0; pMulticast != NULL; i++) {
-        //         pMulticast = pMulticast->Next;
-        //     }
-        //     printf("\tNumber of Multicast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Multicast Addresses\n");
-        // }
+        pMulticast = pCurrAddresses->FirstMulticastAddress;
+        if (pMulticast) {
+            for (i = 0; pMulticast != NULL; i++) {
+                pMulticast = pMulticast->Next;
+            }
+            printf("\tNumber of Multicast Addresses: %d\n", i);
+        } 
+        else {
+            printf("\tNo Multicast Addresses\n");
+        }
 
-        // pDnServer = pCurrAddresses->FirstDnsServerAddress;
-        // if (pDnServer) {
-        //     for (i = 0; pDnServer != NULL; i++) {
-        //         pDnServer = pDnServer->Next;
-        //     }
-        //     printf("\tNumber of DNS Server Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo DNS Server Addresses\n");
-        // }
+        pDnServer = pCurrAddresses->FirstDnsServerAddress;
+        if (pDnServer) {
+            for (i = 0; pDnServer != NULL; i++) {
+                pDnServer = pDnServer->Next;
+            }
+            printf("\tNumber of DNS Server Addresses: %d\n", i);
+        } 
+        else {
+            printf("\tNo DNS Server Addresses\n");
+        }
 
-        // if (pCurrAddresses->PhysicalAddressLength != 0) {
-        //     printf("\tPhysical address: ");
-        //     for (i = 0; i < (int) pCurrAddresses->PhysicalAddressLength; i++) {
-        //         if (i == (pCurrAddresses->PhysicalAddressLength - 1)) {
-        //             printf("%.2X\n", (int) pCurrAddresses->PhysicalAddress[i]);
-        //         }
-        //         else {
-        //             printf("%.2X-", (int) pCurrAddresses->PhysicalAddress[i]);
-        //         }
-        //     }
-        // }
+        printf("\tZoneIndices (hex): ");
+        for (i = 0; i < 16; i++) {
+            printf("%lx ", pCurrAddresses->ZoneIndices[i]);
+        }
+        printf("\n");
 
-        // printf("\tZoneIndices (hex): ");
-        // for (i = 0; i < 16; i++) {
-        //     printf("%lx ", pCurrAddresses->ZoneIndices[i]);
-        // }
-        // printf("\n");
-
-        // pPrefix = pCurrAddresses->FirstPrefix;
-        // if (pPrefix) {
-        //     for (i = 0; pPrefix != NULL; i++) {
-        //         pPrefix = pPrefix->Next;
-        //     }
-        //     printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNumber of IP Adapter Prefix entries: 0\n");
-        // }
+        pPrefix = pCurrAddresses->FirstPrefix;
+        if (pPrefix) {
+            for (i = 0; pPrefix != NULL; i++) {
+                pPrefix = pPrefix->Next;
+            }
+            printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
+        } 
+        else {
+            printf("\tNumber of IP Adapter Prefix entries: 0\n");
+        }
+        printf("\n");
 
         pCurrAddresses = pCurrAddresses->Next;
     }
@@ -180,17 +175,38 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
 IfEntry NetworkAdapters::GetIf(IF_INDEX Index) {
     MIB_IFROW ifrow;
     ifrow.dwIndex = Index;
+    IfEntry entry;
     if( GetIfEntry( &ifrow ) == NO_ERROR ) {
-        IfEntry entry;
         entry.dwInOctets = (double) ifrow.dwInOctets;
         entry.dwOutOctets = (double) ifrow.dwOutOctets;
-        return entry;
+        entry.dwInDiscards = (double) ifrow.dwInDiscards;
+        entry.dwInErrors = (double) ifrow.dwInErrors;
+        entry.dwOutDiscards = (double) ifrow.dwOutDiscards;
+        entry.dwOutErrors = (double) ifrow.dwOutErrors;
+        entry.dwSpeed = (double) ifrow.dwSpeed;
+        entry.dwLastChange = (double) ifrow.dwLastChange;
+        entry.dwInNUcastPkts = (double) ifrow.dwInNUcastPkts;
+        entry.dwOutNUcastPkts = (double) ifrow.dwOutNUcastPkts;
+        entry.dwOutUcastPkts = (double) ifrow.dwOutUcastPkts;
+        entry.dwInUcastPkts = (double) ifrow.dwInUcastPkts;
+        entry.dwOutQLen = (double) ifrow.dwOutQLen;
+        entry.dwInUnknownProtos = (double) ifrow.dwInUnknownProtos;
     }
     else {
-        printf("Could not open default interface !\n");
-        IfEntry entry;
         entry.dwInOctets = 0;
         entry.dwOutOctets = 0;
-        return entry;
+        entry.dwInDiscards = 0;
+        entry.dwInErrors = 0;
+        entry.dwOutDiscards = 0;
+        entry.dwOutErrors = 0;
+        entry.dwSpeed = 0;
+        entry.dwLastChange = 0;
+        entry.dwInNUcastPkts = 0;
+        entry.dwOutNUcastPkts = 0;
+        entry.dwOutUcastPkts = 0;
+        entry.dwInUcastPkts = 0;
+        entry.dwOutQLen = 0;
+        entry.dwInUnknownProtos = 0;
     }
+    return entry;
 }

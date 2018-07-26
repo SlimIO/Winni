@@ -49,6 +49,7 @@ napi_value GetInterfaces(napi_env env, napi_callback_info info) {
             addDoubleProperty(env, JSInterfaceObject, "IfIndex", Interface.IfIndex);
             addDoubleProperty(env, JSInterfaceObject, "IfType", Interface.IfType);
             addCharProperty(env, JSInterfaceObject, "Name", (char*) Interface.Name);
+            addCharProperty(env, JSInterfaceObject, "PhysicalAddress", Interface.PhysicalAddress);
             addCharProperty(env, JSInterfaceObject, "DnsSuffix", Interface.DnsSuffix);
             addCharProperty(env, JSInterfaceObject, "Description", Interface.Description);
             addCharProperty(env, JSInterfaceObject, "FriendlyName", Interface.FriendlyName);
@@ -127,6 +128,18 @@ napi_value GetIfEntry(napi_env env, napi_callback_info info) {
 
     addDoubleProperty(env, JSInterfaceObject, "dwOutOctets", ifEntry.dwOutOctets);
     addDoubleProperty(env, JSInterfaceObject, "dwInOctets", ifEntry.dwInOctets);
+    addDoubleProperty(env, JSInterfaceObject, "dwInDiscards", ifEntry.dwInDiscards);
+    addDoubleProperty(env, JSInterfaceObject, "dwInErrors", ifEntry.dwInErrors);
+    addDoubleProperty(env, JSInterfaceObject, "dwOutDiscards", ifEntry.dwOutDiscards);
+    addDoubleProperty(env, JSInterfaceObject, "dwOutErrors", ifEntry.dwOutErrors);
+    addDoubleProperty(env, JSInterfaceObject, "dwSpeed", ifEntry.dwSpeed);
+    addDoubleProperty(env, JSInterfaceObject, "dwLastChange", ifEntry.dwLastChange);
+    addDoubleProperty(env, JSInterfaceObject, "dwInNUcastPkts", ifEntry.dwInNUcastPkts);
+    addDoubleProperty(env, JSInterfaceObject, "dwOutNUcastPkts", ifEntry.dwOutNUcastPkts);
+    addDoubleProperty(env, JSInterfaceObject, "dwOutUcastPkts", ifEntry.dwOutUcastPkts);
+    addDoubleProperty(env, JSInterfaceObject, "dwInUcastPkts", ifEntry.dwInUcastPkts);
+    addDoubleProperty(env, JSInterfaceObject, "dwOutQLen", ifEntry.dwOutQLen);
+    addDoubleProperty(env, JSInterfaceObject, "dwInUnknownProtos", ifEntry.dwInUnknownProtos);
 
     return JSInterfaceObject;
 }

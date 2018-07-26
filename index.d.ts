@@ -4,6 +4,7 @@ declare namespace Winni {
         IfIndex: number;
         IfType: number;
         Length: number;
+        PhysicalAddress: string;
         DnsSuffix: string;
         Description: string;
         FriendlyName: string;
@@ -20,6 +21,18 @@ declare namespace Winni {
     interface IfEntry {
         dwOutOctets: number;
         dwInOctets: number;
+        dwInDiscards: number;
+        dwInErrors: number;
+        dwOutDiscards: number;
+        dwOutErrors: number;
+        dwSpeed: number;
+        dwLastChange: number;
+        dwInNUcastPkts: number;
+        dwOutNUcastPkts: number;
+        dwOutUcastPkts: number;
+        dwInUcastPkts: number;
+        dwOutQLen: number;
+        dwInUnknownProtos: number;
     }
 
     export function getInterfaces(): NetworkInterface[];

@@ -11,7 +11,6 @@
 
 #define WORKING_BUFFER_SIZE 15000
 #define MAX_TRIES 3
-#define BUFFER_SIZE 50
 
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))

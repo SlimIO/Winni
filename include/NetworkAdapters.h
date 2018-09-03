@@ -62,7 +62,6 @@ class NetworkAdapters {
     public:
         NetworkAdapters();
         std::vector<NetworkInterface> GetInterfaces();
-        IfEntry GetIf(IF_INDEX Index);
 
     private:
         PIP_ADAPTER_ADDRESSES pAddresses;

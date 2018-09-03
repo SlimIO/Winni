@@ -17,7 +17,9 @@
     "url": "https://github.com/SlimIO/winni/issues"
   },
   "homepage": "https://github.com/SlimIO/winni#readme",
-  "dependencies": {},
+  "dependencies": {
+    "node-addon-api": "^1.4.0"
+  },
   "gypfile": true,
   "devDependencies": {
     "node-gyp": "^3.6.1"

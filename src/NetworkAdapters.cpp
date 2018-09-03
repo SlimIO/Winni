@@ -98,8 +98,13 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
 
         int PhysicalAddressLength = (int) pCurrAddresses->PhysicalAddressLength;
         if (PhysicalAddressLength != 0) {
-            std::string PhysicalAddress((char *) pCurrAddresses->PhysicalAddress);
-            Interface.PhysicalAddress = (char *) PhysicalAddress.c_str();
+            // std::string PhysicalAddress((char *) pCurrAddresses->PhysicalAddress);
+            // Interface.PhysicalAddress = (char *) PhysicalAddress.c_str();
+            for (int i = 0; i < PhysicalAddressLength; i++) {
+                printf("%.2X-", (int) pCurrAddresses->PhysicalAddress[i]);
+            }
+            printf("\n");
+            Interface.PhysicalAddress = "";
         }
         else {
             Interface.PhysicalAddress = "";
@@ -177,43 +182,4 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
     }
 
     return ret;
-}
-
-IfEntry NetworkAdapters::GetIf(IF_INDEX Index) {
-    MIB_IFROW ifrow;
-    ifrow.dwIndex = Index;
-    IfEntry entry;
-    if( GetIfEntry( &ifrow ) == NO_ERROR ) {
-        entry.dwInOctets = (double) ifrow.dwInOctets;
-        entry.dwOutOctets = (double) ifrow.dwOutOctets;
-        entry.dwInDiscards = (double) ifrow.dwInDiscards;
-        entry.dwInErrors = (double) ifrow.dwInErrors;
-        entry.dwOutDiscards = (double) ifrow.dwOutDiscards;
-        entry.dwOutErrors = (double) ifrow.dwOutErrors;
-        entry.dwSpeed = (double) ifrow.dwSpeed;
-        entry.dwLastChange = (double) ifrow.dwLastChange;
-        entry.dwInNUcastPkts = (double) ifrow.dwInNUcastPkts;
-        entry.dwOutNUcastPkts = (double) ifrow.dwOutNUcastPkts;
-        entry.dwOutUcastPkts = (double) ifrow.dwOutUcastPkts;
-        entry.dwInUcastPkts = (double) ifrow.dwInUcastPkts;
-        entry.dwOutQLen = (double) ifrow.dwOutQLen;
-        entry.dwInUnknownProtos = (double) ifrow.dwInUnknownProtos;
-    }
-    else {
-        entry.dwInOctets = 0;
-        entry.dwOutOctets = 0;
-        entry.dwInDiscards = 0;
-        entry.dwInErrors = 0;
-        entry.dwOutDiscards = 0;
-        entry.dwOutErrors = 0;
-        entry.dwSpeed = 0;
-        entry.dwLastChange = 0;
-        entry.dwInNUcastPkts = 0;
-        entry.dwOutNUcastPkts = 0;
-        entry.dwOutUcastPkts = 0;
-        entry.dwInUcastPkts = 0;
-        entry.dwOutQLen = 0;
-        entry.dwInUnknownProtos = 0;
-    }
-    return entry;
 }

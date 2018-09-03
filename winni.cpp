@@ -1,128 +1,115 @@
-#include <iostream>
-#include <string>
+#include <winsock2.h>
 #include "NetworkAdapters.h"
-#include "JavaScriptObject.h"
 #include "node_api.h"
-#include "assert.h"
+#include "napi.h"
+using namespace Napi;
 using namespace std;
 
-#define DECLARE_NAPI_METHOD(name, func)                          \
-  { name, 0, func, 0, 0, 0, napi_default, 0 }
-
-napi_value GetInterfaces(napi_env env, napi_callback_info info) {
-    napi_status status;
+/*
+ * Complete list of Interfaces!
+ */
+Value getInterfaces(const CallbackInfo& info) {
+    Env env = info.Env();
     NetworkAdapters Adapters;
 
     // Create JavaScript Array
-    napi_value JSInterfaceArray;
-    status = napi_create_array(env, &JSInterfaceArray);
-    assert(status == napi_ok);
+    Array ret = Array::New(env);
 
     // Retrieve interfaces
     vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
-    for (int i = 0; i < vInterfaces.size(); i++) {
+    for (unsigned int i = 0; i < vInterfaces.size(); i++) {
         NetworkInterface Interface = vInterfaces[i];
-        JavaScriptObject JSInterfaceObject(env);
+        Object oInterface = Object::New(env);
+        ret[i] = oInterface;
 
         /** Setup Properties */
-        JSInterfaceObject.addDouble("IfIndex", Interface.IfIndex);
-        JSInterfaceObject.addDouble("IfType", Interface.IfType);
-        JSInterfaceObject.addString("Name", (char*) Interface.Name);
-        JSInterfaceObject.addString("PhysicalAddress", Interface.PhysicalAddress);
-        JSInterfaceObject.addString("DnsSuffix", Interface.DnsSuffix);
-        JSInterfaceObject.addString("Description", Interface.Description);
-        JSInterfaceObject.addString("FriendlyName", Interface.FriendlyName);
-        JSInterfaceObject.addDouble("Flags", Interface.Flags);
-        JSInterfaceObject.addDouble("Length", Interface.Length);
-        JSInterfaceObject.addDouble("Mtu", Interface.Mtu);
-        JSInterfaceObject.addDouble("OperStatus", Interface.OperStatus);
-        JSInterfaceObject.addDouble("ReceiveLinkSpeed", Interface.ReceiveLinkSpeed);
-        JSInterfaceObject.addDouble("TransmitLinkSpeed", Interface.TransmitLinkSpeed);
-        JSInterfaceObject.addBool("Ipv4Enabled", Interface.Ipv4Enabled == 1 ? true : false );
-        JSInterfaceObject.addBool("Ipv6Enabled", Interface.Ipv6Enabled == 1 ? true : false );
-        JSInterfaceObject.addDouble("Ipv6IfIndex", Interface.Ipv6IfIndex);
-        JSInterfaceObject.addBool("DdnsEnabled", Interface.DdnsEnabled == 1 ? true : false );
-        JSInterfaceObject.addDouble("RegisterAdapterSuffix", Interface.RegisterAdapterSuffix);
-        JSInterfaceObject.addBool("ReceiveOnly", Interface.ReceiveOnly == 1 ? true : false );
-        JSInterfaceObject.addBool("NoMulticast", Interface.NoMulticast == 1 ? true : false );
-        JSInterfaceObject.addBool("Ipv6OtherStatefulConfig", Interface.Ipv6OtherStatefulConfig == 1 ? true : false );
-        JSInterfaceObject.addBool("NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
-        JSInterfaceObject.addBool("Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
-
-        /** Create array entry **/
-        napi_value index;
-        status = napi_create_int32(env, i, &index);
-        assert(status == napi_ok);
-
-        status = napi_set_property(env, JSInterfaceArray, index, JSInterfaceObject.getSelf());
-        assert(status == napi_ok);
+        oInterface.Set("IfIndex", Interface.IfIndex);
+        oInterface.Set("IfType", Interface.IfType);
+        oInterface.Set("Name", (char*) Interface.Name);
+        oInterface.Set("PhysicalAddress", Interface.PhysicalAddress);
+        oInterface.Set("DnsSuffix", Interface.DnsSuffix);
+        oInterface.Set("Description", Interface.Description);
+        oInterface.Set("FriendlyName", Interface.FriendlyName);
+        oInterface.Set("Flags", Interface.Flags);
+        oInterface.Set("Length", Interface.Length);
+        oInterface.Set("Mtu", Interface.Mtu);
+        oInterface.Set("OperStatus", Interface.OperStatus);
+        oInterface.Set("ReceiveLinkSpeed", Interface.ReceiveLinkSpeed);
+        oInterface.Set("TransmitLinkSpeed", Interface.TransmitLinkSpeed);
+        oInterface.Set("Ipv4Enabled", Interface.Ipv4Enabled == 1 ? true : false );
+        oInterface.Set("Ipv6Enabled", Interface.Ipv6Enabled == 1 ? true : false );
+        oInterface.Set("Ipv6IfIndex", Interface.Ipv6IfIndex);
+        oInterface.Set("DdnsEnabled", Interface.DdnsEnabled == 1 ? true : false );
+        oInterface.Set("RegisterAdapterSuffix", Interface.RegisterAdapterSuffix);
+        oInterface.Set("ReceiveOnly", Interface.ReceiveOnly == 1 ? true : false );
+        oInterface.Set("NoMulticast", Interface.NoMulticast == 1 ? true : false );
+        oInterface.Set("Ipv6OtherStatefulConfig", Interface.Ipv6OtherStatefulConfig == 1 ? true : false );
+        oInterface.Set("NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
+        oInterface.Set("Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
     };
 
-    return JSInterfaceArray;
+    return ret;
 }
 
-napi_value GetIfEntry(napi_env env, napi_callback_info info) {
-    napi_status status;
+/*
+ * Get Interfaces ifEntry with ifIndex
+ */
+Value getIfEntry(const CallbackInfo& info) {
+    Env env = info.Env();
 
-    // Retrieve args
-    size_t argc = 1;
-    napi_value args[1];
-    status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    assert(status == napi_ok);
-
-    // Check arguments length
-    if (argc < 1) {
-        napi_throw_type_error(env, nullptr, "Wrong number of arguments provided!");
-        return nullptr;
+    // Check argument length!
+    if (info.Length() < 1) {
+        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
-    // Get typeof of first arg
-    napi_valuetype ifIndexNAPIType;
-    status = napi_typeof(env, args[0], &ifIndexNAPIType);
-    assert(status == napi_ok);
-
-    if (ifIndexNAPIType != napi_number) {
-        napi_throw_type_error(env, nullptr, "ifIndex argument should be typeof number");
-        return nullptr;
+    // DriveName should be typeof string
+    if (!info[0].IsNumber()) {
+        Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
+        return env.Null();
     }
 
-    double ifIndex;
-    status = napi_get_value_double(env, args[0], &ifIndex);
-    assert(status == napi_ok);
+    // Retrieve ifIndex
+    double ifIndex = info[0].As<Number>().DoubleValue();
 
-    NetworkAdapters Adapters;
-    IfEntry ifEntry = Adapters.GetIf((IF_INDEX) ifIndex);
+    MIB_IFROW ifrow;
+    ifrow.dwIndex = (IF_INDEX) ifIndex;
+    if(GetIfEntry(&ifrow) != NO_ERROR ) {
+        Error::New(env, "Failed to retrieve ifEntry!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
     
     // Create JavaScript Object
-    JavaScriptObject JSInterfaceObject(env);
+    Object ret = Object::New(env);
+    ret.Set("dwOutOctets", ifrow.dwOutOctets);
+    ret.Set("dwInOctets", ifrow.dwInOctets);
+    ret.Set("dwInDiscards", ifrow.dwInDiscards);
+    ret.Set("dwInErrors", ifrow.dwInErrors);
+    ret.Set("dwOutDiscards", ifrow.dwOutDiscards);
+    ret.Set("dwOutErrors", ifrow.dwOutErrors);
+    ret.Set("dwSpeed", ifrow.dwSpeed);
+    ret.Set("dwLastChange", ifrow.dwLastChange);
+    ret.Set("dwInNUcastPkts", ifrow.dwInNUcastPkts);
+    ret.Set("dwOutNUcastPkts", ifrow.dwOutNUcastPkts);
+    ret.Set("dwOutUcastPkts", ifrow.dwOutUcastPkts);
+    ret.Set("dwInUcastPkts", ifrow.dwInUcastPkts);
+    ret.Set("dwOutQLen", ifrow.dwOutQLen);
+    ret.Set("dwInUnknownProtos", ifrow.dwInUnknownProtos);
 
-    JSInterfaceObject.addDouble("dwOutOctets", ifEntry.dwOutOctets);
-    JSInterfaceObject.addDouble("dwInOctets", ifEntry.dwInOctets);
-    JSInterfaceObject.addDouble("dwInDiscards", ifEntry.dwInDiscards);
-    JSInterfaceObject.addDouble("dwInErrors", ifEntry.dwInErrors);
-    JSInterfaceObject.addDouble("dwOutDiscards", ifEntry.dwOutDiscards);
-    JSInterfaceObject.addDouble("dwOutErrors", ifEntry.dwOutErrors);
-    JSInterfaceObject.addDouble("dwSpeed", ifEntry.dwSpeed);
-    JSInterfaceObject.addDouble("dwLastChange", ifEntry.dwLastChange);
-    JSInterfaceObject.addDouble("dwInNUcastPkts", ifEntry.dwInNUcastPkts);
-    JSInterfaceObject.addDouble("dwOutNUcastPkts", ifEntry.dwOutNUcastPkts);
-    JSInterfaceObject.addDouble("dwOutUcastPkts", ifEntry.dwOutUcastPkts);
-    JSInterfaceObject.addDouble("dwInUcastPkts", ifEntry.dwInUcastPkts);
-    JSInterfaceObject.addDouble("dwOutQLen", ifEntry.dwOutQLen);
-    JSInterfaceObject.addDouble("dwInUnknownProtos", ifEntry.dwInUnknownProtos);
-
-    return JSInterfaceObject.self;
+    return ret;
 }
 
-napi_value Init(napi_env env, napi_value exports) {
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_METHOD("getInterfaces", GetInterfaces),
-        DECLARE_NAPI_METHOD("getIfEntry", GetIfEntry)
-    };
-    napi_status status = napi_define_properties(env, exports, sizeof(desc) / sizeof(*desc), desc);
-    assert(status == napi_ok);
+
+// Initialize Native Addon
+Object Init(Env env, Object exports) {
+
+    // Setup methods
+    // TODO: Launch with AsyncWorker to avoid event loop starvation
+    exports.Set("getInterfaces", Function::New(env, getInterfaces));
+    exports.Set("getIfEntry", Function::New(env, getIfEntry));
 
     return exports;
 }
 
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
+// Export
+NODE_API_MODULE(winni, Init)

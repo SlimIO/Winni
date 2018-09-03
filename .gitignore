@@ -33,4 +33,6 @@
 
 node_modules
 build
-!build/config.gypi
+.exe
+.obj
+.vscode

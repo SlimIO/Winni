@@ -31,8 +31,8 @@ struct NetworkInterface {
     char* DnsSuffix;
     char* Description;
     char* FriendlyName;
-    const char* PhysicalAddress;
-    vector<ULONG> ZoneIndices;
+    string PhysicalAddress = string("");
+    ULONG ZoneIndices[16];
     char* Dhcpv6Server;
     double Flags;
     double Mtu;
@@ -71,12 +71,13 @@ struct IfEntry {
 class NetworkAdapters {
     public:
         NetworkAdapters();
-        std::vector<NetworkInterface> GetInterfaces();
+        bool Initialize();
+        bool GetInterfaces(vector<NetworkInterface> *vInterfaces);
 
     private:
         PIP_ADAPTER_ADDRESSES pAddresses;
         DWORD dwRetVal;
-        bool Initialize();
+        
 };
 
 #endif // NETWORKADAPTERS_H

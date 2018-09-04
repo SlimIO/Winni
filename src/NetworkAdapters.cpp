@@ -1,8 +1,7 @@
 #include "NetworkAdapters.h"
 
 // NetworkAdapters Constructor
-NetworkAdapters::NetworkAdapters() 
-{
+NetworkAdapters::NetworkAdapters() {
     PIP_ADAPTER_ADDRESSES pAddresses = NULL;
     DWORD dwRetVal = 0;
 }
@@ -33,6 +32,15 @@ bool NetworkAdapters::Initialize() {
         Iterations++;
     } while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (Iterations < MAX_TRIES));
 
+    // If an Error is encountered
+    if (dwRetVal != NO_ERROR) {
+        printf("Call to GetAdaptersAddresses failed with error: %d\n", dwRetVal);
+        if (dwRetVal == ERROR_NO_DATA) {
+            printf("\tNo addresses were found for the requested parameters\n");
+        }
+        return false;
+    }
+
     return true;
 }
 
@@ -60,32 +68,15 @@ string byteSeqToString(const unsigned char bytes[], size_t n) {
     return stm.str();
 }
 
-std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
-    std::vector<NetworkInterface> ret;
-    bool isInitialized = Initialize();
-    if (isInitialized == false) {
-        printf("Failed to initialize interfaces\n");
-        return ret;
-    }
-    DWORD dwSize = 0;
+bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
     unsigned int i = 0;
-    LPVOID lpMsgBuf = NULL;
-
     PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
-    PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
-    PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
-    PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
-    IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
+    // PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
+    // PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
+    // PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
+    // IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
     IP_ADAPTER_PREFIX *pPrefix = NULL;
-
-    // If an Error is encountered
-    if (dwRetVal != NO_ERROR) {
-        printf("Call to GetAdaptersAddresses failed with error: %d\n", dwRetVal);
-        if (dwRetVal == ERROR_NO_DATA) {
-            printf("\tNo addresses were found for the requested parameters\n");
-        }
-        return ret;
-    }
+    size_t PhysicalAddressLength = 0;
 
     /** Translate datas */
     pCurrAddresses = pAddresses;
@@ -114,23 +105,15 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         Interface.NetbiosOverTcpipEnabled = (double) pCurrAddresses->NetbiosOverTcpipEnabled;
         Interface.Ipv6ManagedAddressConfigurationSupported = (double) pCurrAddresses->Ipv6ManagedAddressConfigurationSupported;
 
-        size_t PhysicalAddressLength = (size_t) pCurrAddresses->PhysicalAddressLength;
+        PhysicalAddressLength = (size_t) pCurrAddresses->PhysicalAddressLength;
         if (PhysicalAddressLength != 0) {
-            string PhysicalAddrString = byteSeqToString(pCurrAddresses->PhysicalAddress, PhysicalAddressLength);
-            const char* PhysicalAddrCStr = PhysicalAddrString.c_str();
-            cout << "PhysicalAddr: " << PhysicalAddrCStr << endl;
-            Interface.PhysicalAddress = PhysicalAddrCStr;
-        }
-        else {
-            Interface.PhysicalAddress = "";
+            Interface.PhysicalAddress = byteSeqToString(pCurrAddresses->PhysicalAddress, PhysicalAddressLength);
         }
 
         // Retrive Zone Indices (fixed size of 16).
-        vector<ULONG> ZoneIndices;
         for (i = 0; i < 16; i++) {
-            ZoneIndices.push_back(pCurrAddresses->ZoneIndices[i]);
+            Interface.ZoneIndices[i] = pCurrAddresses->ZoneIndices[i];
         }
-        Interface.ZoneIndices = ZoneIndices;
 
         sockaddr_in* Dhcpv6ServerAddr = (sockaddr_in*) pCurrAddresses->Dhcpv6Server.lpSockaddr;
         // char Dhcpv6Server[INET_ADDRSTRLEN];
@@ -152,7 +135,7 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         // }
 
         // Push back interface!
-        ret.push_back(Interface);
+        vInterfaces->push_back(Interface);
 
         // pUnicast = pCurrAddresses->FirstUnicastAddress;
         // if (pUnicast != NULL) {
@@ -202,9 +185,10 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         pCurrAddresses = pCurrAddresses->Next;
     }
 
+    // Cleanup allocation
     if (pAddresses) {
         FREE(pAddresses);
     }
 
-    return ret;
+    return true;
 }

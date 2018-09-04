@@ -10,14 +10,31 @@ using namespace std;
  */
 Value getInterfaces(const CallbackInfo& info) {
     Env env = info.Env();
-    NetworkAdapters Adapters;
 
     // Create JavaScript Array
     Array ret = Array::New(env);
 
+    // Create new instanceof NetworkAdapters
+    NetworkAdapters Adapters;
+
+    // Initialize Buffer to retrieve Adapters
+    if (!Adapters.Initialize()) {
+        Error::New(env, "Failed to initialize Adapters!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
     // Retrieve interfaces
-    vector<NetworkInterface> vInterfaces = Adapters.GetInterfaces();
-    for (unsigned int i = 0; i < vInterfaces.size(); i++) {
+    vector<NetworkInterface> vInterfaces;
+    if (!Adapters.GetInterfaces(&vInterfaces)) {
+        Error::New(env, "Failed to retrieve network interfaces!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    // Declare type(s)
+    unsigned int j;
+
+    // Iterate throught interfaces
+    for (size_t i = 0; i < vInterfaces.size(); i++) {
         NetworkInterface Interface = vInterfaces[i];
         Object oInterface = Object::New(env);
         ret[i] = oInterface;
@@ -26,7 +43,7 @@ Value getInterfaces(const CallbackInfo& info) {
         oInterface.Set("IfIndex", Interface.IfIndex);
         oInterface.Set("IfType", Interface.IfType);
         oInterface.Set("Name", Interface.Name);
-        oInterface.Set("PhysicalAddress", String::New(env, Interface.PhysicalAddress));
+        oInterface.Set("PhysicalAddress", Interface.PhysicalAddress);
         oInterface.Set("DnsSuffix", Interface.DnsSuffix);
         oInterface.Set("Description", Interface.Description);
         oInterface.Set("FriendlyName", Interface.FriendlyName);
@@ -47,7 +64,7 @@ Value getInterfaces(const CallbackInfo& info) {
         oInterface.Set("NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
         oInterface.Set("Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
         Array ZoneIndices = Array::New(env, 16);
-        for(unsigned int j = 0; j < 16; j++) {
+        for (j = 0; j < 16; j++) {
             ZoneIndices[j] = Number::New(env, Interface.ZoneIndices[j]);
         }
         oInterface.Set("ZoneIndices", ZoneIndices);

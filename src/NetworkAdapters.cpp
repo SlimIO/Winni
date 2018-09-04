@@ -109,19 +109,21 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
         if (PhysicalAddressLength != 0) {
             Interface.PhysicalAddress = byteSeqToString(pCurrAddresses->PhysicalAddress, PhysicalAddressLength);
         }
+        // cout << "PhysicalAddr: " << Interface.PhysicalAddress << endl;
+
+        // // Retrieve Socket ADDR
+        // sockaddr_in* Dhcpv6ServerAddr = (sockaddr_in*) pCurrAddresses->Dhcpv6Server.lpSockaddr;
+        // char buffer[INET6_ADDRSTRLEN];
+        // PCSTR result = inet_ntop(Dhcpv6ServerAddr->sin_family, &Dhcpv6ServerAddr->sin_addr, buffer, INET6_ADDRSTRLEN);
+        // // char Dhcpv6Server[NI_MAXHOST];
+        // // getnameinfo((struct sockaddr *)Dhcpv6ServerAddr, pCurrAddresses->Dhcpv6Server.iSockaddrLength, Dhcpv6Server, sizeof(Dhcpv6Server), NULL, 0, NI_NUMERICHOST);
+
+        // cout << "dhcp6Server: " << result << endl;
 
         // Retrive Zone Indices (fixed size of 16).
         for (i = 0; i < 16; i++) {
             Interface.ZoneIndices[i] = pCurrAddresses->ZoneIndices[i];
         }
-
-        sockaddr_in* Dhcpv6ServerAddr = (sockaddr_in*) pCurrAddresses->Dhcpv6Server.lpSockaddr;
-        // char Dhcpv6Server[INET_ADDRSTRLEN];
-        // inet_ntop(Dhcpv6ServerAddr->sin_family, &(((struct sockaddr_in *)&Dhcpv6ServerAddr)->sin_addr), Dhcpv6Server, INET_ADDRSTRLEN);
-        char Dhcpv6Server[NI_MAXHOST];
-        getnameinfo((struct sockaddr *)Dhcpv6ServerAddr, pCurrAddresses->Dhcpv6Server.iSockaddrLength, Dhcpv6Server, sizeof(Dhcpv6Server), NULL, 0, NI_NUMERICHOST);
-
-        cout << "dhcp6Server: " << string(Dhcpv6Server) << endl;
 
         // pDnServer = pCurrAddresses->FirstDnsServerAddress;
         // if (pDnServer) {

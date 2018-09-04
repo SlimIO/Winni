@@ -27,24 +27,50 @@ declare namespace Winni {
     }
 
     interface IfEntry {
-        dwOutOctets: number;
-        dwInOctets: number;
-        dwInDiscards: number;
-        dwInErrors: number;
-        dwOutDiscards: number;
-        dwOutErrors: number;
-        dwSpeed: number;
-        dwLastChange: number;
-        dwInNUcastPkts: number;
-        dwOutNUcastPkts: number;
-        dwOutUcastPkts: number;
-        dwInUcastPkts: number;
-        dwOutQLen: number;
-        dwInUnknownProtos: number;
+        physicalAddress: string;
+        interfaceLuid: number;
+        interfaceIndex: number;
+        interfaceGuid: string;
+        alias: string;
+        description: string;
+        mtu: number;
+        type: number;
+        tunnelType: number;
+        mediaType: number;
+        accessType: number;
+        physicalMediumType: number;
+        directionType: number;
+        operStatus: number;
+        adminStatus: number;
+        mediaConnectState: number;
+        networkGuid: string;
+        connectionType: number;
+        transmitLinkSpeed: number;
+        receiveLinkSpeed: number;
+        inOctets: number;
+        inUcastPkts: number;
+        inNUcastPkts: number;
+        inDiscards: number;
+        inErrors: number;
+        inUnknownProtos: number;
+        inUcastOctets: number;
+        inMulticastOctets: number;
+        inBroadcastOctets: number;
+        outOctets: number;
+        outUcastPkts: number;
+        outNUcastPkts: number;
+        outDiscards: number;
+        outErrors: number;
+        outUnknownProtos: number;
+        outUcastOctets: number;
+        outMulticastOctets: number;
+        outBroadcastOctets: number;
+        outQLen: number;
     }
 
-    export function getInterfaces(): NetworkInterface[];
+    export function getAdaptersAddresses(): NetworkInterface[];
     export function getIfEntry(IfIndex: number): IfEntry;
+    export function getNumberOfInterfaces(): number;
 }
 
 export as namespace Winni;

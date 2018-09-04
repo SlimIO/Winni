@@ -2,13 +2,19 @@
 #include "NetworkAdapters.h"
 #include "node_api.h"
 #include "napi.h"
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+
 using namespace Napi;
 using namespace std;
 
 /*
  * Complete list of Interfaces!
+ * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iptypes/ns-iptypes-_ip_adapter_addresses_lh
  */
-Value getInterfaces(const CallbackInfo& info) {
+Value getAdaptersAddresses(const CallbackInfo& info) {
     Env env = info.Env();
 
     // Create JavaScript Array
@@ -74,64 +80,155 @@ Value getInterfaces(const CallbackInfo& info) {
 }
 
 /*
- * Get Interfaces ifEntry with ifIndex
+ * convert wchar_t* to std::string 
+ */
+string wCharToString(wchar_t* field) {
+    wstring ws(field);
+    string ret(ws.begin(), ws.end());
+
+    return ret;
+}
+
+/*
+ * Convert GUID to std::string
+ */
+string GuidToString(GUID guid) {
+	char guid_cstr[39];
+	snprintf(guid_cstr, sizeof(guid_cstr),
+	         "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+	         guid.Data1, guid.Data2, guid.Data3,
+	         guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+	         guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+	return string(guid_cstr);
+}
+
+/*
+ * Byte sequence to std::string
+ */
+string byteSeqToString(UCHAR bytes[], size_t n) {
+    ostringstream stm;
+    stm << hex << uppercase;
+
+    for(size_t i = 0; i < n; ++i) {
+        stm << setw(2) << setfill('0') << unsigned(bytes[i]);
+    }
+
+    return stm.str();
+}
+
+/*
+ * getIfEntry retrieves information for the specified interface on the local computer.
+ * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getifentry
+ * @doc: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow
  */
 Value getIfEntry(const CallbackInfo& info) {
     Env env = info.Env();
+    DWORD retVal = 0;
+    NET_IFINDEX ifIndex;
+    MIB_IF_ROW2 ifRow;
+    SecureZeroMemory((PVOID) &ifRow, sizeof(MIB_IF_ROW2));
 
-    // Check argument length!
+
+    // Check if there is less than one argument, if then throw a JavaScript exception
     if (info.Length() < 1) {
         Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // DriveName should be typeof string
+    // The first argument (ifIndex) should be typeof Napi::Number
     if (!info[0].IsNumber()) {
         Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // Retrieve ifIndex
-    double ifIndex = info[0].As<Number>().DoubleValue();
-
-    MIB_IFROW ifrow;
-    ifrow.dwIndex = (IF_INDEX) ifIndex;
-    if(GetIfEntry(&ifrow) != NO_ERROR ) {
-        Error::New(env, "Failed to retrieve ifEntry!").ThrowAsJavaScriptException();
+    // Retrieve ifIndex argument (casted as a double integer)
+    ifIndex = (NET_IFINDEX) info[0].As<Number>().Int64Value();
+    ifRow.InterfaceIndex = ifIndex;
+    retVal = GetIfEntry2(&ifRow);
+    if (retVal != NO_ERROR) {
+        // wprintf(L"GetIfEntry returned error: %lu\n", retVal);
+        Error::New(env, "Failed to retrieve IfEntry!").ThrowAsJavaScriptException();
         return env.Null();
     }
     
     // Create JavaScript Object
     Object ret = Object::New(env);
-    ret.Set("dwOutOctets", ifrow.dwOutOctets);
-    ret.Set("dwInOctets", ifrow.dwInOctets);
-    ret.Set("dwInDiscards", ifrow.dwInDiscards);
-    ret.Set("dwInErrors", ifrow.dwInErrors);
-    ret.Set("dwOutDiscards", ifrow.dwOutDiscards);
-    ret.Set("dwOutErrors", ifrow.dwOutErrors);
-    ret.Set("dwSpeed", ifrow.dwSpeed);
-    ret.Set("dwLastChange", ifrow.dwLastChange);
-    ret.Set("dwInNUcastPkts", ifrow.dwInNUcastPkts);
-    ret.Set("dwOutNUcastPkts", ifrow.dwOutNUcastPkts);
-    ret.Set("dwOutUcastPkts", ifrow.dwOutUcastPkts);
-    ret.Set("dwInUcastPkts", ifrow.dwInUcastPkts);
-    ret.Set("dwOutQLen", ifrow.dwOutQLen);
-    ret.Set("dwInUnknownProtos", ifrow.dwInUnknownProtos);
+    size_t PhysicalAddrLen = (size_t) ifRow.PhysicalAddressLength;
+    ret.Set("physicalAddress", PhysicalAddrLen != 0 ? byteSeqToString(ifRow.PhysicalAddress, PhysicalAddrLen) : "");
+    ret.Set("interfaceLuid", ifRow.InterfaceLuid.Value);
+    ret.Set("interfaceIndex", (ULONG) ifRow.InterfaceIndex);
+    ret.Set("interfaceGuid", GuidToString(ifRow.InterfaceGuid));
+    ret.Set("alias", wCharToString((wchar_t*) ifRow.Alias));
+    ret.Set("description", wCharToString((wchar_t*) ifRow.Description));
+    ret.Set("mtu", ifRow.Mtu);
+    ret.Set("type", ifRow.Type);
+    ret.Set("tunnelType", (double) ifRow.TunnelType);
+    ret.Set("mediaType", (double) ifRow.MediaType);
+    ret.Set("accessType", (double) ifRow.AccessType);
+    ret.Set("physicalMediumType", (double) ifRow.PhysicalMediumType);
+    ret.Set("directionType", (double) ifRow.DirectionType);
+    ret.Set("operStatus", (double) ifRow.OperStatus);
+    ret.Set("adminStatus", (double) ifRow.AdminStatus);
+    ret.Set("mediaConnectState", (double) ifRow.MediaConnectState);
+    ret.Set("networkGuid", GuidToString(ifRow.NetworkGuid));
+    ret.Set("connectionType", (double) ifRow.ConnectionType);
+    ret.Set("transmitLinkSpeed", ifRow.TransmitLinkSpeed);
+    ret.Set("receiveLinkSpeed", ifRow.ReceiveLinkSpeed);
+    ret.Set("inOctets", ifRow.InOctets);
+    ret.Set("inUcastPkts", ifRow.InUcastPkts);
+    ret.Set("inNUcastPkts", ifRow.InNUcastPkts);
+    ret.Set("inDiscards", ifRow.InDiscards);
+    ret.Set("inErrors", ifRow.InErrors);
+    ret.Set("inUnknownProtos", ifRow.InUnknownProtos);
+    ret.Set("inUcastOctets", ifRow.InUcastOctets);
+    ret.Set("inMulticastOctets", ifRow.InMulticastOctets);
+    ret.Set("inBroadcastOctets", ifRow.InBroadcastOctets);
+    ret.Set("outOctets", ifRow.OutOctets);
+    ret.Set("outUcastPkts", ifRow.OutUcastPkts);
+    ret.Set("outNUcastPkts", ifRow.OutNUcastPkts);
+    ret.Set("outDiscards", ifRow.OutDiscards);
+    ret.Set("outErrors", ifRow.OutErrors);
+    ret.Set("outUcastOctets", ifRow.OutUcastOctets);
+    ret.Set("outMulticastOctets", ifRow.OutMulticastOctets);
+    ret.Set("outBroadcastOctets", ifRow.OutBroadcastOctets);
+    ret.Set("outQLen", ifRow.OutQLen);
 
     return ret;
 }
 
+/*
+ * Retrieves the number of interfaces on the local computer.
+ * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getnumberofinterfaces
+ */
+Value getNumberOfInterfaces(const CallbackInfo& info) {
+    Env env = info.Env();
 
-// Initialize Native Addon
+    DWORD numInterfaces = 0;
+    DWORD error = GetNumberOfInterfaces(&numInterfaces);
+    if (error != NO_ERROR) {
+        Error::New(env, "Failed to retrieve the number of interfaces on the local computer!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    return Number::New(env, numInterfaces);
+}
+
+/*
+ * Initialize Node.JS addon binding exports
+ */
 Object Init(Env env, Object exports) {
 
     // Setup methods
     // TODO: Launch with AsyncWorker to avoid event loop starvation
-    exports.Set("getInterfaces", Function::New(env, getInterfaces));
+    exports.Set("getAdaptersAddresses", Function::New(env, getAdaptersAddresses));
     exports.Set("getIfEntry", Function::New(env, getIfEntry));
+    exports.Set("getNumberOfInterfaces", Function::New(env, getNumberOfInterfaces));
 
     return exports;
 }
 
-// Export
+// Declare NATIVE API/ADDON
 NODE_API_MODULE(winni, Init)

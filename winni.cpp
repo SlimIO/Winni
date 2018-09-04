@@ -80,7 +80,7 @@ Value getAdaptersAddresses(const CallbackInfo& info) {
 }
 
 /*
- * convert wchar_t* to std::string 
+ * Cast wchar_t* to std::string 
  */
 string wCharToString(wchar_t* field) {
     wstring ws(field);
@@ -90,13 +90,12 @@ string wCharToString(wchar_t* field) {
 }
 
 /*
- * Convert GUID to std::string
+ * Cast GUID to std::string
  */
 string GuidToString(GUID guid) {
 	char guid_cstr[39];
-	snprintf(guid_cstr, sizeof(guid_cstr),
-	         "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-	         guid.Data1, guid.Data2, guid.Data3,
+	snprintf(guid_cstr, sizeof(guid_cstr), "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+             guid.Data1, guid.Data2, guid.Data3,
 	         guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
 	         guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
 
@@ -104,7 +103,7 @@ string GuidToString(GUID guid) {
 }
 
 /*
- * Byte sequence to std::string
+ * Cast Byte sequence to std::string
  */
 string byteSeqToString(UCHAR bytes[], size_t n) {
     ostringstream stm;
@@ -119,6 +118,7 @@ string byteSeqToString(UCHAR bytes[], size_t n) {
 
 /*
  * Translate MIB_IF_ROW2 into Napi::Object
+ * This method is used by getIfEntry and getIfTable binding
  */
 Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
     Object ret = Object::New(env);
@@ -174,11 +174,12 @@ Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
  */
 Value getIfEntry(const CallbackInfo& info) {
     Env env = info.Env();
+
+    // Instanciate variables
     DWORD retVal = 0;
     NET_IFINDEX ifIndex;
     MIB_IF_ROW2 ifRow;
     SecureZeroMemory((PVOID) &ifRow, sizeof(MIB_IF_ROW2));
-
 
     // Check if there is less than one argument, if then throw a JavaScript exception
     if (info.Length() < 1) {

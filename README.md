@@ -22,6 +22,5 @@ $ node-gyp build
 
 - Prepare npm package (export with bindings).
 - Add prebuilt (prebuildify)
-- Improve NetworkAdapters class
-- Convert all times
+- All missing fields (still have to convert SOCKET_ADDRESS)
 - Add AsyncWorker for all methods and return Promise Object!

@@ -70,6 +70,7 @@ declare namespace Winni {
 
     export function getAdaptersAddresses(): NetworkInterface[];
     export function getIfEntry(IfIndex: number): IfEntry;
+    export function getIfTable(): IfEntry[];
     export function getNumberOfInterfaces(): number;
 }
 

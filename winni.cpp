@@ -118,43 +118,11 @@ string byteSeqToString(UCHAR bytes[], size_t n) {
 }
 
 /*
- * getIfEntry retrieves information for the specified interface on the local computer.
- * 
- * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getifentry
- * @doc: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow
+ * Translate MIB_IF_ROW2 into Napi::Object
  */
-Value getIfEntry(const CallbackInfo& info) {
-    Env env = info.Env();
-    DWORD retVal = 0;
-    NET_IFINDEX ifIndex;
-    MIB_IF_ROW2 ifRow;
-    SecureZeroMemory((PVOID) &ifRow, sizeof(MIB_IF_ROW2));
-
-
-    // Check if there is less than one argument, if then throw a JavaScript exception
-    if (info.Length() < 1) {
-        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
-        return env.Null();
-    }
-
-    // The first argument (ifIndex) should be typeof Napi::Number
-    if (!info[0].IsNumber()) {
-        Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
-        return env.Null();
-    }
-
-    // Retrieve ifIndex argument (casted as a double integer)
-    ifIndex = (NET_IFINDEX) info[0].As<Number>().Int64Value();
-    ifRow.InterfaceIndex = ifIndex;
-    retVal = GetIfEntry2(&ifRow);
-    if (retVal != NO_ERROR) {
-        // wprintf(L"GetIfEntry returned error: %lu\n", retVal);
-        Error::New(env, "Failed to retrieve IfEntry!").ThrowAsJavaScriptException();
-        return env.Null();
-    }
-    
-    // Create JavaScript Object
+Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
     Object ret = Object::New(env);
+
     size_t PhysicalAddrLen = (size_t) ifRow.PhysicalAddressLength;
     ret.Set("physicalAddress", PhysicalAddrLen != 0 ? byteSeqToString(ifRow.PhysicalAddress, PhysicalAddrLen) : "");
     ret.Set("interfaceLuid", ifRow.InterfaceLuid.Value);
@@ -199,6 +167,78 @@ Value getIfEntry(const CallbackInfo& info) {
 }
 
 /*
+ * getIfEntry retrieves information for the specified interface on the local computer.
+ * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getifentry
+ * @doc: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow
+ */
+Value getIfEntry(const CallbackInfo& info) {
+    Env env = info.Env();
+    DWORD retVal = 0;
+    NET_IFINDEX ifIndex;
+    MIB_IF_ROW2 ifRow;
+    SecureZeroMemory((PVOID) &ifRow, sizeof(MIB_IF_ROW2));
+
+
+    // Check if there is less than one argument, if then throw a JavaScript exception
+    if (info.Length() < 1) {
+        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    // The first argument (ifIndex) should be typeof Napi::Number
+    if (!info[0].IsNumber()) {
+        Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    // Retrieve ifIndex argument (casted as a double integer)
+    ifIndex = (NET_IFINDEX) info[0].As<Number>().Int64Value();
+    ifRow.InterfaceIndex = ifIndex;
+    retVal = GetIfEntry2(&ifRow);
+    if (retVal != NO_ERROR) {
+        // wprintf(L"GetIfEntry returned error: %lu\n", retVal);
+        Error::New(env, "Failed to retrieve IfEntry!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    return translateIfRow(env, ifRow);
+}
+
+/*
+ * Retrieves the MIB-II interface table.
+ * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-getiftable2
+ */
+Value getIfTable(const CallbackInfo& info) {
+    Env env = info.Env();
+
+    // Instanciate variables
+    PMIB_IF_TABLE2 ifTable;
+    DWORD dwVal;
+
+    // Get all ifEntry
+    dwVal = GetIfTable2(&ifTable);
+    if (dwVal != NO_ERROR) {
+        Error::New(env, "Failed to execute getIfTable!").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+
+    // Retrieve all ifEntry of the table
+    Array ret = Array::New(env);
+    int numEntries = (int) ifTable->NumEntries;
+    if (numEntries > 0) {
+        for (int i = 0; i < numEntries; ++i) {
+            MIB_IF_ROW2 ifRow = ifTable->Table[i];
+            ret[i] = translateIfRow(env, ifRow);
+        }
+    }
+    
+    return ret;
+}
+
+
+/*
  * Retrieves the number of interfaces on the local computer.
  * 
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getnumberofinterfaces
@@ -225,6 +265,7 @@ Object Init(Env env, Object exports) {
     // TODO: Launch with AsyncWorker to avoid event loop starvation
     exports.Set("getAdaptersAddresses", Function::New(env, getAdaptersAddresses));
     exports.Set("getIfEntry", Function::New(env, getIfEntry));
+    exports.Set("getIfTable", Function::New(env, getIfTable));
     exports.Set("getNumberOfInterfaces", Function::New(env, getNumberOfInterfaces));
 
     return exports;

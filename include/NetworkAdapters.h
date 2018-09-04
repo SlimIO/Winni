@@ -2,15 +2,23 @@
 #define NETWORKADAPTERS_H
 
 #include <winsock2.h>
+#include <Ws2tcpip.h>
 #include <iphlpapi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 #include <vector>
+
+using namespace std;
 #pragma comment(lib, "IPHLPAPI.lib")
 
 #define WORKING_BUFFER_SIZE 15000
 #define MAX_TRIES 3
+#define NI_MAXSERV    32
+#define NI_MAXHOST  1025
 
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
@@ -23,7 +31,9 @@ struct NetworkInterface {
     char* DnsSuffix;
     char* Description;
     char* FriendlyName;
-    char* PhysicalAddress;
+    const char* PhysicalAddress;
+    vector<ULONG> ZoneIndices;
+    char* Dhcpv6Server;
     double Flags;
     double Mtu;
     double OperStatus;
@@ -66,7 +76,6 @@ class NetworkAdapters {
     private:
         PIP_ADAPTER_ADDRESSES pAddresses;
         DWORD dwRetVal;
-        char* toChar(PWCHAR field);
         bool Initialize();
 };
 

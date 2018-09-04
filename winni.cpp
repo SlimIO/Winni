@@ -25,8 +25,8 @@ Value getInterfaces(const CallbackInfo& info) {
         /** Setup Properties */
         oInterface.Set("IfIndex", Interface.IfIndex);
         oInterface.Set("IfType", Interface.IfType);
-        oInterface.Set("Name", (char*) Interface.Name);
-        oInterface.Set("PhysicalAddress", Interface.PhysicalAddress);
+        oInterface.Set("Name", Interface.Name);
+        oInterface.Set("PhysicalAddress", String::New(env, Interface.PhysicalAddress));
         oInterface.Set("DnsSuffix", Interface.DnsSuffix);
         oInterface.Set("Description", Interface.Description);
         oInterface.Set("FriendlyName", Interface.FriendlyName);
@@ -46,6 +46,11 @@ Value getInterfaces(const CallbackInfo& info) {
         oInterface.Set("Ipv6OtherStatefulConfig", Interface.Ipv6OtherStatefulConfig == 1 ? true : false );
         oInterface.Set("NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
         oInterface.Set("Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
+        Array ZoneIndices = Array::New(env, 16);
+        for(unsigned int j = 0; j < 16; j++) {
+            ZoneIndices[j] = Number::New(env, Interface.ZoneIndices[j]);
+        }
+        oInterface.Set("ZoneIndices", ZoneIndices);
     };
 
     return ret;

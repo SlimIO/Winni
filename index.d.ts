@@ -5,6 +5,7 @@ declare namespace Winni {
         IfType: number;
         Length: number;
         PhysicalAddress: string;
+        ZoneIndices: number[];
         DnsSuffix: string;
         Description: string;
         FriendlyName: string;

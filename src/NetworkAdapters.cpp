@@ -7,8 +7,7 @@ NetworkAdapters::NetworkAdapters()
     DWORD dwRetVal = 0;
 }
 
-bool NetworkAdapters::Initialize() 
-{
+bool NetworkAdapters::Initialize() {
     // Top Properties
     ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
     ULONG family = AF_UNSPEC;
@@ -37,11 +36,28 @@ bool NetworkAdapters::Initialize()
     return true;
 }
 
-char* NetworkAdapters::toChar(PWCHAR field) {
+/*
+ * PWCharToCChar
+ */
+char* PWCharToCChar(PWCHAR field) {
     size_t len = wcslen(field) + 1;
     char* CHARField = new char[len];
     wcstombs(CHARField, field, len);
     return CHARField;
+}
+
+/*
+ * Byte sequence to std::string
+ */
+string byteSeqToString(const unsigned char bytes[], size_t n) {
+    ostringstream stm;
+    stm << hex << uppercase;
+
+    for(size_t i = 0; i < n; ++i) {
+        stm << setw(2) << setfill('0') << unsigned(bytes[i]);
+    }
+
+    return stm.str();
 }
 
 std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
@@ -70,16 +86,18 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         }
         return ret;
     }
+
+    /** Translate datas */
     pCurrAddresses = pAddresses;
     while (pCurrAddresses) {
         NetworkInterface Interface;
         Interface.IfIndex       = (double) pCurrAddresses->IfIndex;
         Interface.IfType        = (double) pCurrAddresses->IfType;
-        Interface.Name          = std::string(pCurrAddresses->AdapterName).c_str();
+        Interface.Name          = string(pCurrAddresses->AdapterName).c_str();
         Interface.Length        = (double) pCurrAddresses->Length;
-        Interface.DnsSuffix     = toChar(pCurrAddresses->DnsSuffix);
-        Interface.Description   = toChar(pCurrAddresses->Description);
-        Interface.FriendlyName  = toChar(pCurrAddresses->FriendlyName);
+        Interface.DnsSuffix     = PWCharToCChar(pCurrAddresses->DnsSuffix);
+        Interface.Description   = PWCharToCChar(pCurrAddresses->Description);
+        Interface.FriendlyName  = PWCharToCChar(pCurrAddresses->FriendlyName);
         Interface.Flags         = (double) pCurrAddresses->Flags;
         Interface.Mtu           = (double) pCurrAddresses->Mtu;
         Interface.OperStatus    = (double) pCurrAddresses->OperStatus;
@@ -96,83 +114,90 @@ std::vector<NetworkInterface> NetworkAdapters::GetInterfaces()  {
         Interface.NetbiosOverTcpipEnabled = (double) pCurrAddresses->NetbiosOverTcpipEnabled;
         Interface.Ipv6ManagedAddressConfigurationSupported = (double) pCurrAddresses->Ipv6ManagedAddressConfigurationSupported;
 
-        int PhysicalAddressLength = (int) pCurrAddresses->PhysicalAddressLength;
+        size_t PhysicalAddressLength = (size_t) pCurrAddresses->PhysicalAddressLength;
         if (PhysicalAddressLength != 0) {
-            // std::string PhysicalAddress((char *) pCurrAddresses->PhysicalAddress);
-            // Interface.PhysicalAddress = (char *) PhysicalAddress.c_str();
-            for (int i = 0; i < PhysicalAddressLength; i++) {
-                printf("%.2X-", (int) pCurrAddresses->PhysicalAddress[i]);
-            }
-            printf("\n");
-            Interface.PhysicalAddress = "";
+            string PhysicalAddrString = byteSeqToString(pCurrAddresses->PhysicalAddress, PhysicalAddressLength);
+            const char* PhysicalAddrCStr = PhysicalAddrString.c_str();
+            cout << "PhysicalAddr: " << PhysicalAddrCStr << endl;
+            Interface.PhysicalAddress = PhysicalAddrCStr;
         }
         else {
             Interface.PhysicalAddress = "";
         }
 
+        // Retrive Zone Indices (fixed size of 16).
+        vector<ULONG> ZoneIndices;
+        for (i = 0; i < 16; i++) {
+            ZoneIndices.push_back(pCurrAddresses->ZoneIndices[i]);
+        }
+        Interface.ZoneIndices = ZoneIndices;
+
+        sockaddr_in* Dhcpv6ServerAddr = (sockaddr_in*) pCurrAddresses->Dhcpv6Server.lpSockaddr;
+        // char Dhcpv6Server[INET_ADDRSTRLEN];
+        // inet_ntop(Dhcpv6ServerAddr->sin_family, &(((struct sockaddr_in *)&Dhcpv6ServerAddr)->sin_addr), Dhcpv6Server, INET_ADDRSTRLEN);
+        char Dhcpv6Server[NI_MAXHOST];
+        getnameinfo((struct sockaddr *)Dhcpv6ServerAddr, pCurrAddresses->Dhcpv6Server.iSockaddrLength, Dhcpv6Server, sizeof(Dhcpv6Server), NULL, 0, NI_NUMERICHOST);
+
+        cout << "dhcp6Server: " << string(Dhcpv6Server) << endl;
+
+        // pDnServer = pCurrAddresses->FirstDnsServerAddress;
+        // if (pDnServer) {
+        //     for (i = 0; pDnServer != NULL; i++) {
+        //         pDnServer = pDnServer->Next;
+        //     }
+        //     printf("\tNumber of DNS Server Addresses: %d\n", i);
+        // } 
+        // else {
+        //     printf("\tNo DNS Server Addresses\n");
+        // }
+
+        // Push back interface!
         ret.push_back(Interface);
 
-        pUnicast = pCurrAddresses->FirstUnicastAddress;
-        if (pUnicast != NULL) {
-            for (i = 0; pUnicast != NULL; i++) {
-                pUnicast = pUnicast->Next;
-            }
-            printf("\tNumber of Unicast Addresses: %d\n", i);
-        } 
-        else {
-            printf("\tNo Unicast Addresses\n");
-        }
+        // pUnicast = pCurrAddresses->FirstUnicastAddress;
+        // if (pUnicast != NULL) {
+        //     for (i = 0; pUnicast != NULL; i++) {
+        //         pUnicast = pUnicast->Next;
+        //     }
+        //     printf("\tNumber of Unicast Addresses: %d\n", i);
+        // } 
+        // else {
+        //     printf("\tNo Unicast Addresses\n");
+        // }
 
-        pAnycast = pCurrAddresses->FirstAnycastAddress;
-        if (pAnycast) {
-            for (i = 0; pAnycast != NULL; i++) {
-                pAnycast = pAnycast->Next;
-            }
-            printf("\tNumber of Anycast Addresses: %d\n", i);
-        } 
-        else {
-            printf("\tNo Anycast Addresses\n");
-        }
+        // pAnycast = pCurrAddresses->FirstAnycastAddress;
+        // if (pAnycast) {
+        //     for (i = 0; pAnycast != NULL; i++) {
+        //         pAnycast = pAnycast->Next;
+        //     }
+        //     printf("\tNumber of Anycast Addresses: %d\n", i);
+        // } 
+        // else {
+        //     printf("\tNo Anycast Addresses\n");
+        // }
 
-        pMulticast = pCurrAddresses->FirstMulticastAddress;
-        if (pMulticast) {
-            for (i = 0; pMulticast != NULL; i++) {
-                pMulticast = pMulticast->Next;
-            }
-            printf("\tNumber of Multicast Addresses: %d\n", i);
-        } 
-        else {
-            printf("\tNo Multicast Addresses\n");
-        }
+        // pMulticast = pCurrAddresses->FirstMulticastAddress;
+        // if (pMulticast) {
+        //     for (i = 0; pMulticast != NULL; i++) {
+        //         pMulticast = pMulticast->Next;
+        //     }
+        //     printf("\tNumber of Multicast Addresses: %d\n", i);
+        // } 
+        // else {
+        //     printf("\tNo Multicast Addresses\n");
+        // }
 
-        pDnServer = pCurrAddresses->FirstDnsServerAddress;
-        if (pDnServer) {
-            for (i = 0; pDnServer != NULL; i++) {
-                pDnServer = pDnServer->Next;
-            }
-            printf("\tNumber of DNS Server Addresses: %d\n", i);
-        } 
-        else {
-            printf("\tNo DNS Server Addresses\n");
-        }
-
-        printf("\tZoneIndices (hex): ");
-        for (i = 0; i < 16; i++) {
-            printf("%lx ", pCurrAddresses->ZoneIndices[i]);
-        }
-        printf("\n");
-
-        pPrefix = pCurrAddresses->FirstPrefix;
-        if (pPrefix) {
-            for (i = 0; pPrefix != NULL; i++) {
-                pPrefix = pPrefix->Next;
-            }
-            printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
-        } 
-        else {
-            printf("\tNumber of IP Adapter Prefix entries: 0\n");
-        }
-        printf("\n");
+        // pPrefix = pCurrAddresses->FirstPrefix;
+        // if (pPrefix) {
+        //     for (i = 0; pPrefix != NULL; i++) {
+        //         pPrefix = pPrefix->Next;
+        //     }
+        //     printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
+        // } 
+        // else {
+        //     printf("\tNumber of IP Adapter Prefix entries: 0\n");
+        // }
+        // printf("\n");
 
         pCurrAddresses = pCurrAddresses->Next;
     }

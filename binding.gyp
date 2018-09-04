@@ -6,6 +6,9 @@
                 "winni.cpp",
                 "src/NetworkAdapters.cpp"
             ],
+            "libraries": [
+                "Ws2_32.lib"
+            ],
             "include_dirs": [
                 "include",
                 "<!@(node -p \"require('node-addon-api').include\")"

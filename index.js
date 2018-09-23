@@ -7,14 +7,15 @@ console.timeEnd("getNumberOfInterfaces");
 
 console.log(`number of interfaces: ${interfaceNumber}\n`);
 
-console.time("getInterfaces");
+console.time("getAdaptersAddresses");
 const networkInterfaces = winni.getAdaptersAddresses();
-console.timeEnd("getInterfaces"); 
+console.timeEnd("getAdaptersAddresses"); 
+console.log(networkInterfaces);
 
-console.time("getIfTable");
-const ifTables = winni.getIfTable();
-console.timeEnd("getIfTable"); 
-// console.log(ifTables);
+// console.time("getIfTable");
+// const ifTables = winni.getIfTable();
+// console.timeEnd("getIfTable"); 
+// console.log(ifTables.length);
 
 // for (const interface of networkInterfaces) {
 //     console.log(interface.Name);

@@ -10,6 +10,33 @@ using namespace Napi;
 using namespace std;
 
 /*
+ * Cast GUID to std::string
+ */
+string GuidToString(GUID guid) {
+	char guid_cstr[39];
+	snprintf(guid_cstr, sizeof(guid_cstr), "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+             guid.Data1, guid.Data2, guid.Data3,
+	         guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+	         guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+	return string(guid_cstr);
+}
+
+/*
+ * Cast Byte sequence to std::string
+ */
+string byteSeqToString(UCHAR bytes[], size_t n) {
+    ostringstream stm;
+    stm << hex << uppercase;
+
+    for(size_t i = 0; i < n; ++i) {
+        stm << setw(2) << setfill('0') << unsigned(bytes[i]);
+    }
+
+    return stm.str();
+}
+
+/*
  * Complete list of Interfaces!
  * 
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iptypes/ns-iptypes-_ip_adapter_addresses_lh
@@ -40,8 +67,10 @@ Value getAdaptersAddresses(const CallbackInfo& info) {
     unsigned int j;
 
     // Iterate throught interfaces
+    NetworkInterface Interface;
     for (size_t i = 0; i < vInterfaces.size(); i++) {
-        NetworkInterface Interface = vInterfaces[i];
+        SecureZeroMemory(&Interface, sizeof(Interface));
+        Interface = vInterfaces[i];
         Object oInterface = Object::New(env);
         ret[i] = oInterface;
 
@@ -69,6 +98,12 @@ Value getAdaptersAddresses(const CallbackInfo& info) {
         oInterface.Set("Ipv6OtherStatefulConfig", Interface.Ipv6OtherStatefulConfig == 1 ? true : false );
         oInterface.Set("NetbiosOverTcpipEnabled", Interface.NetbiosOverTcpipEnabled == 1 ? true : false );
         oInterface.Set("Ipv6ManagedAddressConfigurationSupported", Interface.Ipv6ManagedAddressConfigurationSupported == 1 ? true : false );
+        oInterface.Set("NetworkGuid", Interface.NetworkGuid);
+        oInterface.Set("ConnectionType", Interface.ConnectionType);
+        oInterface.Set("TunnelType", Interface.TunnelType);
+        oInterface.Set("Dhcpv6ClientDuid", Interface.Dhcpv6ClientDuid);
+        oInterface.Set("Ipv4Metric", Interface.Ipv4Metric);
+        oInterface.Set("Ipv6Metric", Interface.Ipv6Metric);
         Array ZoneIndices = Array::New(env, 16);
         for (j = 0; j < 16; j++) {
             ZoneIndices[j] = Number::New(env, Interface.ZoneIndices[j]);
@@ -87,33 +122,6 @@ string wCharToString(wchar_t* field) {
     string ret(ws.begin(), ws.end());
 
     return ret;
-}
-
-/*
- * Cast GUID to std::string
- */
-string GuidToString(GUID guid) {
-	char guid_cstr[39];
-	snprintf(guid_cstr, sizeof(guid_cstr), "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
-             guid.Data1, guid.Data2, guid.Data3,
-	         guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
-	         guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
-
-	return string(guid_cstr);
-}
-
-/*
- * Cast Byte sequence to std::string
- */
-string byteSeqToString(UCHAR bytes[], size_t n) {
-    ostringstream stm;
-    stm << hex << uppercase;
-
-    for(size_t i = 0; i < n; ++i) {
-        stm << setw(2) << setfill('0') << unsigned(bytes[i]);
-    }
-
-    return stm.str();
 }
 
 /*
@@ -174,8 +182,6 @@ Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
  */
 Value getIfEntry(const CallbackInfo& info) {
     Env env = info.Env();
-
-    // Instanciate variables
     DWORD retVal = 0;
     NET_IFINDEX ifIndex;
     MIB_IF_ROW2 ifRow;
@@ -213,8 +219,6 @@ Value getIfEntry(const CallbackInfo& info) {
  */
 Value getIfTable(const CallbackInfo& info) {
     Env env = info.Env();
-
-    // Instanciate variables
     PMIB_IF_TABLE2 ifTable;
     DWORD dwVal;
 
@@ -227,12 +231,8 @@ Value getIfTable(const CallbackInfo& info) {
 
     // Retrieve all ifEntry of the table
     Array ret = Array::New(env);
-    int numEntries = (int) ifTable->NumEntries;
-    if (numEntries > 0) {
-        for (int i = 0; i < numEntries; ++i) {
-            MIB_IF_ROW2 ifRow = ifTable->Table[i];
-            ret[i] = translateIfRow(env, ifRow);
-        }
+    for (int i = 0; i < (int) ifTable->NumEntries; ++i) {
+        ret[i] = translateIfRow(env, ifTable->Table[i]);
     }
     
     return ret;
@@ -246,9 +246,10 @@ Value getIfTable(const CallbackInfo& info) {
  */
 Value getNumberOfInterfaces(const CallbackInfo& info) {
     Env env = info.Env();
+    DWORD numInterfaces, error;
 
-    DWORD numInterfaces = 0;
-    DWORD error = GetNumberOfInterfaces(&numInterfaces);
+    // Get Number of Interfaces on the current system
+    error = GetNumberOfInterfaces(&numInterfaces);
     if (error != NO_ERROR) {
         Error::New(env, "Failed to retrieve the number of interfaces on the local computer!").ThrowAsJavaScriptException();
         return env.Null();
@@ -263,7 +264,6 @@ Value getNumberOfInterfaces(const CallbackInfo& info) {
 Object Init(Env env, Object exports) {
 
     // Setup methods
-    // TODO: Launch with AsyncWorker to avoid event loop starvation
     exports.Set("getAdaptersAddresses", Function::New(env, getAdaptersAddresses));
     exports.Set("getIfEntry", Function::New(env, getIfEntry));
     exports.Set("getIfTable", Function::New(env, getIfTable));

@@ -49,6 +49,12 @@ struct NetworkInterface {
     double Ipv6OtherStatefulConfig;
     double NetbiosOverTcpipEnabled;
     double Ipv6ManagedAddressConfigurationSupported;
+    string NetworkGuid;
+    double ConnectionType;
+    double TunnelType;
+    string Dhcpv6ClientDuid;
+    ULONG Ipv4Metric;
+    ULONG Ipv6Metric;
 };
 
 struct IfEntry {

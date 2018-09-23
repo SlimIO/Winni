@@ -45,6 +45,20 @@ bool NetworkAdapters::Initialize() {
 }
 
 /*
+ * Function to Convert GUID to std::string
+ */
+string guidToString(GUID guid) {
+	char guid_cstr[39];
+	snprintf(guid_cstr, sizeof(guid_cstr),
+	         "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+	         guid.Data1, guid.Data2, guid.Data3,
+	         guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3],
+	         guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+	return string(guid_cstr);
+}
+
+/*
  * PWCharToCChar
  */
 char* PWCharToCChar(PWCHAR field) {
@@ -66,6 +80,14 @@ string byteSeqToString(const unsigned char bytes[], size_t n) {
     }
 
     return stm.str();
+}
+
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa) {
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
 bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
@@ -104,26 +126,25 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
         Interface.Ipv6OtherStatefulConfig = (double) pCurrAddresses->Ipv6OtherStatefulConfig;
         Interface.NetbiosOverTcpipEnabled = (double) pCurrAddresses->NetbiosOverTcpipEnabled;
         Interface.Ipv6ManagedAddressConfigurationSupported = (double) pCurrAddresses->Ipv6ManagedAddressConfigurationSupported;
+        Interface.NetworkGuid = guidToString(pCurrAddresses->NetworkGuid);
+        Interface.ConnectionType = (double) pCurrAddresses->ConnectionType;
+        Interface.TunnelType = (double) pCurrAddresses->TunnelType;
+        Interface.Dhcpv6ClientDuid = byteSeqToString(pCurrAddresses->Dhcpv6ClientDuid, pCurrAddresses->Dhcpv6ClientDuidLength);
+        Interface.Ipv4Metric = pAddresses->Ipv4Metric;
+        Interface.Ipv6Metric = pAddresses->Ipv6Metric;
 
         PhysicalAddressLength = (size_t) pCurrAddresses->PhysicalAddressLength;
         if (PhysicalAddressLength != 0) {
             Interface.PhysicalAddress = byteSeqToString(pCurrAddresses->PhysicalAddress, PhysicalAddressLength);
         }
-        // cout << "PhysicalAddr: " << Interface.PhysicalAddress << endl;
-
-        // // Retrieve Socket ADDR
-        // sockaddr_in* Dhcpv6ServerAddr = (sockaddr_in*) pCurrAddresses->Dhcpv6Server.lpSockaddr;
-        // char buffer[INET6_ADDRSTRLEN];
-        // PCSTR result = inet_ntop(Dhcpv6ServerAddr->sin_family, &Dhcpv6ServerAddr->sin_addr, buffer, INET6_ADDRSTRLEN);
-        // // char Dhcpv6Server[NI_MAXHOST];
-        // // getnameinfo((struct sockaddr *)Dhcpv6ServerAddr, pCurrAddresses->Dhcpv6Server.iSockaddrLength, Dhcpv6Server, sizeof(Dhcpv6Server), NULL, 0, NI_NUMERICHOST);
-
-        // cout << "dhcp6Server: " << result << endl;
 
         // Retrive Zone Indices (fixed size of 16).
         for (i = 0; i < 16; i++) {
             Interface.ZoneIndices[i] = pCurrAddresses->ZoneIndices[i];
         }
+
+        // const unsigned char* sa_data = (const unsigned char*) pCurrAddresses->Dhcpv6Server.lpSockaddr->sa_data;
+        // cout << "dhcpv6Serv: " << byteSeqToString(sa_data, sizeof(sa_data)) << endl;
 
         // pDnServer = pCurrAddresses->FirstDnsServerAddress;
         // if (pDnServer) {

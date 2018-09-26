@@ -1,5 +1,5 @@
 declare namespace Winni {
-    interface NetworkInterface {
+    export interface NetworkInterface {
         name: string;
         ifIndex: number;
         ifType: number;
@@ -17,7 +17,7 @@ declare namespace Winni {
         ipv4Enabled: boolean;
         ipv6Enabled: boolean;
         ipv6IfIndex: number;
-        ddnsEnabled: boolean;
+        dnsEnabled: boolean;
         registerAdapterSuffix: number;
         receiveOnly: boolean;
         noMulticast: boolean;
@@ -32,7 +32,7 @@ declare namespace Winni {
         ipv6Metric: number;
     }
 
-    interface IfEntry {
+    export interface IfEntry {
         physicalAddress: string;
         interfaceLuid: number;
         interfaceIndex: number;
@@ -67,7 +67,6 @@ declare namespace Winni {
         outNUcastPkts: number;
         outDiscards: number;
         outErrors: number;
-        outUnknownProtos: number;
         outUcastOctets: number;
         outMulticastOctets: number;
         outBroadcastOctets: number;

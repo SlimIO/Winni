@@ -93,7 +93,7 @@ class GetAdapterAddrWorker : public AsyncWorker {
                 for (j = 0; j < 16; j++) {
                     ZoneIndices[j] = Number::New(Env(), Interface.ZoneIndices[j]);
                 }
-                oInterface.Set("ZoneIndices", ZoneIndices);
+                oInterface.Set("zoneIndices", ZoneIndices);
             };
 
             Callback().Call({Env().Null(), ret});

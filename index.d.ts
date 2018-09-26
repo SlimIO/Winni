@@ -68,10 +68,10 @@ declare namespace Winni {
         outQLen: number;
     }
 
-    export function getAdaptersAddresses(): NetworkInterface[];
-    export function getIfEntry(IfIndex: number): IfEntry;
-    export function getIfTable(): IfEntry[];
-    export function getNumberOfInterfaces(): number;
+    export function getAdaptersAddresses(): Promise<NetworkInterface[]>;
+    export function getIfEntry(IfIndex: number): Promise<IfEntry>;
+    export function getIfTable(): Promise<IfEntry[]>;
+    export function getNumberOfInterfaces(): Promise<number>;
 }
 
 export as namespace Winni;

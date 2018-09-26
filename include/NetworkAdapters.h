@@ -32,6 +32,11 @@ struct NetworkInterface {
     char* Description;
     char* FriendlyName;
     string PhysicalAddress = string("");
+    vector<string> DnServer;
+    vector<string> Unicast;
+    vector<string> Anycast;
+    vector<string> Multicast;
+    vector<string> Prefix;
     ULONG ZoneIndices[16];
     char* Dhcpv6Server;
     double Flags;

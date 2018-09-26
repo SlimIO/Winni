@@ -30,6 +30,10 @@ declare namespace Winni {
         dhcpv6ClientDuid: string;
         ipv4Metric: number;
         ipv6Metric: number;
+        dnServer: string[];
+        anycast: string[];
+        unicast: string[];
+        multicast: string[];
     }
 
     export interface IfEntry {

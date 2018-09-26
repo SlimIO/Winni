@@ -49,7 +49,7 @@ class GetAdapterAddrWorker : public AsyncWorker {
         void OnOK() {
             HandleScope scope(Env());
             Array ret = Array::New(Env());
-            unsigned int j;
+            size_t j;
 
             // Iterate throught interfaces
             NetworkInterface Interface;
@@ -94,6 +94,30 @@ class GetAdapterAddrWorker : public AsyncWorker {
                     ZoneIndices[j] = Number::New(Env(), Interface.ZoneIndices[j]);
                 }
                 oInterface.Set("zoneIndices", ZoneIndices);
+
+                Array DnServer = Array::New(Env(), Interface.DnServer.size());
+                for (j = 0; j < Interface.DnServer.size(); j++) {
+                    DnServer[j] = String::New(Env(), Interface.DnServer.at(j));
+                }
+                oInterface.Set("dnServer", DnServer);
+
+                Array Anycast = Array::New(Env(), Interface.Anycast.size());
+                for (j = 0; j < Interface.Anycast.size(); j++) {
+                    Anycast[j] = String::New(Env(), Interface.Anycast.at(j));
+                }
+                oInterface.Set("anycast", Anycast);
+
+                Array Multicast = Array::New(Env(), Interface.Multicast.size());
+                for (j = 0; j < Interface.Multicast.size(); j++) {
+                    Multicast[j] = String::New(Env(), Interface.Multicast.at(j));
+                }
+                oInterface.Set("multicast", Multicast);
+
+                Array Unicast = Array::New(Env(), Interface.Unicast.size());
+                for (j = 0; j < Interface.Unicast.size(); j++) {
+                    Unicast[j] = String::New(Env(), Interface.Unicast.at(j));
+                }
+                oInterface.Set("unicast", Unicast);
             };
 
             Callback().Call({Env().Null(), ret});

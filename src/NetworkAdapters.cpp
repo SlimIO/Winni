@@ -82,28 +82,57 @@ string byteSeqToString(const unsigned char bytes[], size_t n) {
     return stm.str();
 }
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa) {
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
+bool socketAddrToString(SOCKET_ADDRESS *addr, string *strAddr) {
+    char currAddr[MAX_PATH] = {0};
+    DWORD addrLen = sizeof(currAddr);
+    int success = WSAAddressToStringA(
+        addr->lpSockaddr,
+        (DWORD) addr->iSockaddrLength,
+        NULL,
+        currAddr,
+        &addrLen
+    );
+    if (success == 0) {
+        *strAddr = string(currAddr);
+        return true;
     }
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+
+    return false;
+    // else {
+    //     int error = WSAGetLastError();
+    //     if (error == WSAEINVAL) {
+    //         cout << "invalid argument!" << endl;
+    //     }
+    //     else if (error == WSAEFAULT) {
+    //         cout << "WSAEFAULT" << endl;
+    //     }
+    //     cout << "failed ! error code (" << error << ")" << endl;
+    // }
 }
 
 bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
     unsigned int i = 0;
     PIP_ADAPTER_ADDRESSES pCurrAddresses = NULL;
-    // PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
-    // PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
-    // PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
-    // IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
+    PIP_ADAPTER_UNICAST_ADDRESS pUnicast = NULL;
+    PIP_ADAPTER_ANYCAST_ADDRESS pAnycast = NULL;
+    PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = NULL;
+    IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
     IP_ADAPTER_PREFIX *pPrefix = NULL;
     size_t PhysicalAddressLength = 0;
+    bool getSuccessAddr;
+    WSADATA data;
+
+    int initialized = WSAStartup(MAKEWORD(2, 2), &data);
+    if (initialized != 0) {
+        return false;
+    }
 
     /** Translate datas */
     pCurrAddresses = pAddresses;
     while (pCurrAddresses) {
         NetworkInterface Interface;
+        SecureZeroMemory(&Interface, sizeof(Interface));
+
         Interface.IfIndex       = (double) pCurrAddresses->IfIndex;
         Interface.IfType        = (double) pCurrAddresses->IfType;
         Interface.Name          = string(pCurrAddresses->AdapterName).c_str();
@@ -143,68 +172,68 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
             Interface.ZoneIndices[i] = pCurrAddresses->ZoneIndices[i];
         }
 
-        // const unsigned char* sa_data = (const unsigned char*) pCurrAddresses->Dhcpv6Server.lpSockaddr->sa_data;
-        // cout << "dhcpv6Serv: " << byteSeqToString(sa_data, sizeof(sa_data)) << endl;
+        pDnServer = pCurrAddresses->FirstDnsServerAddress;
+        if (pDnServer) {
+            for (i = 0; pDnServer != NULL; i++) {
+                string currAddr;
+                getSuccessAddr = socketAddrToString(&pDnServer->Address, &currAddr);
+                if (getSuccessAddr) {
+                    Interface.DnServer.push_back(currAddr);
+                }
+                pDnServer = pDnServer->Next;
+            }
+        } 
 
-        // pDnServer = pCurrAddresses->FirstDnsServerAddress;
-        // if (pDnServer) {
-        //     for (i = 0; pDnServer != NULL; i++) {
-        //         pDnServer = pDnServer->Next;
-        //     }
-        //     printf("\tNumber of DNS Server Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo DNS Server Addresses\n");
-        // }
+        pUnicast = pCurrAddresses->FirstUnicastAddress;
+        if (pUnicast != NULL) {
+            for (i = 0; pUnicast != NULL; i++) {
+                string currAddr;
+                getSuccessAddr = socketAddrToString(&pUnicast->Address, &currAddr);
+                if (getSuccessAddr) {
+                    Interface.Unicast.push_back(currAddr);
+                }
+                pUnicast = pUnicast->Next;
+            }
+        }
+
+        pAnycast = pCurrAddresses->FirstAnycastAddress;
+        if (pAnycast) {
+            for (i = 0; pAnycast != NULL; i++) {
+                string currAddr;
+                getSuccessAddr = socketAddrToString(&pAnycast->Address, &currAddr);
+                if (getSuccessAddr) {
+                    Interface.Anycast.push_back(currAddr);
+                }
+                pAnycast = pAnycast->Next;
+            }
+        }
+
+        pMulticast = pCurrAddresses->FirstMulticastAddress;
+        if (pMulticast) {
+            for (i = 0; pMulticast != NULL; i++) {
+                string currAddr;
+                getSuccessAddr = socketAddrToString(&pMulticast->Address, &currAddr);
+                if (getSuccessAddr) {
+                    Interface.Multicast.push_back(currAddr);
+                }
+                pMulticast = pMulticast->Next;
+            }
+        }
+
+        pPrefix = pCurrAddresses->FirstPrefix;
+        if (pPrefix) {
+            for (i = 0; pPrefix != NULL; i++) {
+                string currAddr;
+                getSuccessAddr = socketAddrToString(&pPrefix->Address, &currAddr);
+                if (getSuccessAddr) {
+                    Interface.Prefix.push_back(currAddr);
+                }
+                pPrefix = pPrefix->Next;
+            }
+        }
 
         // Push back interface!
         vInterfaces->push_back(Interface);
-
-        // pUnicast = pCurrAddresses->FirstUnicastAddress;
-        // if (pUnicast != NULL) {
-        //     for (i = 0; pUnicast != NULL; i++) {
-        //         pUnicast = pUnicast->Next;
-        //     }
-        //     printf("\tNumber of Unicast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Unicast Addresses\n");
-        // }
-
-        // pAnycast = pCurrAddresses->FirstAnycastAddress;
-        // if (pAnycast) {
-        //     for (i = 0; pAnycast != NULL; i++) {
-        //         pAnycast = pAnycast->Next;
-        //     }
-        //     printf("\tNumber of Anycast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Anycast Addresses\n");
-        // }
-
-        // pMulticast = pCurrAddresses->FirstMulticastAddress;
-        // if (pMulticast) {
-        //     for (i = 0; pMulticast != NULL; i++) {
-        //         pMulticast = pMulticast->Next;
-        //     }
-        //     printf("\tNumber of Multicast Addresses: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNo Multicast Addresses\n");
-        // }
-
-        // pPrefix = pCurrAddresses->FirstPrefix;
-        // if (pPrefix) {
-        //     for (i = 0; pPrefix != NULL; i++) {
-        //         pPrefix = pPrefix->Next;
-        //     }
-        //     printf("\tNumber of IP Adapter Prefix entries: %d\n", i);
-        // } 
-        // else {
-        //     printf("\tNumber of IP Adapter Prefix entries: 0\n");
-        // }
-        // printf("\n");
-
         pCurrAddresses = pCurrAddresses->Next;
     }
 
@@ -212,6 +241,7 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
     if (pAddresses) {
         FREE(pAddresses);
     }
+    WSACleanup();
 
     return true;
 }

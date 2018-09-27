@@ -82,6 +82,9 @@ string byteSeqToString(const unsigned char bytes[], size_t n) {
     return stm.str();
 }
 
+/**
+ * Cast SOCKET_ADDRESS to String
+ */
 bool socketAddrToString(SOCKET_ADDRESS *addr, string *strAddr) {
     char currAddr[MAX_PATH] = {0};
     DWORD addrLen = sizeof(currAddr);
@@ -98,16 +101,6 @@ bool socketAddrToString(SOCKET_ADDRESS *addr, string *strAddr) {
     }
 
     return false;
-    // else {
-    //     int error = WSAGetLastError();
-    //     if (error == WSAEINVAL) {
-    //         cout << "invalid argument!" << endl;
-    //     }
-    //     else if (error == WSAEFAULT) {
-    //         cout << "WSAEFAULT" << endl;
-    //     }
-    //     cout << "failed ! error code (" << error << ")" << endl;
-    // }
 }
 
 bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
@@ -119,7 +112,6 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
     IP_ADAPTER_DNS_SERVER_ADDRESS *pDnServer = NULL;
     IP_ADAPTER_PREFIX *pPrefix = NULL;
     size_t PhysicalAddressLength = 0;
-    bool getSuccessAddr;
     WSADATA data;
 
     int initialized = WSAStartup(MAKEWORD(2, 2), &data);
@@ -176,8 +168,7 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
         if (pDnServer) {
             for (i = 0; pDnServer != NULL; i++) {
                 string currAddr;
-                getSuccessAddr = socketAddrToString(&pDnServer->Address, &currAddr);
-                if (getSuccessAddr) {
+                if (socketAddrToString(&pDnServer->Address, &currAddr)) {
                     Interface.DnServer.push_back(currAddr);
                 }
                 pDnServer = pDnServer->Next;
@@ -185,51 +176,39 @@ bool NetworkAdapters::GetInterfaces(vector<NetworkInterface> *vInterfaces)  {
         } 
 
         pUnicast = pCurrAddresses->FirstUnicastAddress;
-        if (pUnicast != NULL) {
-            for (i = 0; pUnicast != NULL; i++) {
-                string currAddr;
-                getSuccessAddr = socketAddrToString(&pUnicast->Address, &currAddr);
-                if (getSuccessAddr) {
-                    Interface.Unicast.push_back(currAddr);
-                }
-                pUnicast = pUnicast->Next;
+        while (pUnicast != NULL) {
+            string currAddr;
+            if (socketAddrToString(&pUnicast->Address, &currAddr)) {
+                Interface.Unicast.push_back(currAddr);
             }
+            pUnicast = pUnicast->Next;
         }
 
         pAnycast = pCurrAddresses->FirstAnycastAddress;
-        if (pAnycast) {
-            for (i = 0; pAnycast != NULL; i++) {
-                string currAddr;
-                getSuccessAddr = socketAddrToString(&pAnycast->Address, &currAddr);
-                if (getSuccessAddr) {
-                    Interface.Anycast.push_back(currAddr);
-                }
-                pAnycast = pAnycast->Next;
+        while (pAnycast != NULL) {
+            string currAddr;
+            if (socketAddrToString(&pAnycast->Address, &currAddr)) {
+                Interface.Anycast.push_back(currAddr);
             }
+            pAnycast = pAnycast->Next;
         }
 
         pMulticast = pCurrAddresses->FirstMulticastAddress;
-        if (pMulticast) {
-            for (i = 0; pMulticast != NULL; i++) {
-                string currAddr;
-                getSuccessAddr = socketAddrToString(&pMulticast->Address, &currAddr);
-                if (getSuccessAddr) {
-                    Interface.Multicast.push_back(currAddr);
-                }
-                pMulticast = pMulticast->Next;
+        while (pMulticast != NULL) {
+            string currAddr;
+            if (socketAddrToString(&pMulticast->Address, &currAddr)) {
+                Interface.Multicast.push_back(currAddr);
             }
+            pMulticast = pMulticast->Next;
         }
 
         pPrefix = pCurrAddresses->FirstPrefix;
-        if (pPrefix) {
-            for (i = 0; pPrefix != NULL; i++) {
-                string currAddr;
-                getSuccessAddr = socketAddrToString(&pPrefix->Address, &currAddr);
-                if (getSuccessAddr) {
-                    Interface.Prefix.push_back(currAddr);
-                }
-                pPrefix = pPrefix->Next;
+        while (pPrefix != NULL) {
+            string currAddr;
+            if (socketAddrToString(&pPrefix->Address, &currAddr)) {
+                Interface.Prefix.push_back(currAddr);
             }
+            pPrefix = pPrefix->Next;
         }
 
         // Push back interface!

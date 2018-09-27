@@ -12,6 +12,7 @@ using namespace Slimio;
 /*
  * Complete list of Interfaces!
  * 
+ * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iptypes/ns-iptypes-_ip_adapter_addresses_lh
  */
 class GetAdapterAddrWorker : public AsyncWorker {

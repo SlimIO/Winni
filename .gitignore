@@ -36,3 +36,5 @@ build
 .exe
 .obj
 .vscode
+coverage/
+.nyc_ouput/

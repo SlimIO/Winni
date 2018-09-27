@@ -46,6 +46,10 @@ test("getAdaptersAddresses()", async function getAdaptersAddresses(assert) {
         assert.true(is.string(networkInterface.dhcpv6ClientDuid));
         assert.true(is.number(networkInterface.ipv4Metric));
         assert.true(is.number(networkInterface.ipv6Metric));
+        assert.true(is.array(networkInterface.dnServer));
+        assert.true(is.array(networkInterface.anycast));
+        assert.true(is.array(networkInterface.unicast));
+        assert.true(is.array(networkInterface.multicast));
     }
 });
 
@@ -112,6 +116,13 @@ test("getIfTable()", async function getIfTable(assert) {
     for (const ifEntry of ifTable) {
         checkIfEntry(assert, ifEntry);
     }
+});
+
+test("getIfEntry() - ifIndex should be typeof number", async function getIfEntry(assert) {
+    assert.true(Reflect.has(winni, "getIfEntry"));
+
+    const error = await assert.throws(winni.getIfEntry("hello"), Error);
+    assert.is(error.message, "argument ifIndex should be typeof number!");
 });
 
 test("getIfEntry()", async function getIfEntry(assert) {

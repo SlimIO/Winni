@@ -6,7 +6,7 @@ const winni = require("bindings")("winni.node");
 
 /**
  * @version 1.0.0
- * 
+ *
  * @async
  * @function getAdaptersAddresses
  * @memberof winni#
@@ -15,7 +15,7 @@ const winni = require("bindings")("winni.node");
  *
  * @example
  * const { getAdaptersAddresses } = require("@slimio/winni");
- * 
+ *
  * async function main() {
  *     const adapterAddr = await getAdaptersAddresses();
  *     for (const networkInterface of adapterAddr) {
@@ -38,7 +38,7 @@ function getAdaptersAddresses() {
 
 /**
  * @version 1.0.0
- * 
+ *
  * @async
  * @function getIfTable
  * @memberof winni#
@@ -47,7 +47,7 @@ function getAdaptersAddresses() {
  *
  * @example
  * const { getIfTable } = require("@slimio/winni");
- * 
+ *
  * async function main() {
  *     const ifTables = await getIfTable();
  *     for (const ifEntry of ifTables) {
@@ -70,7 +70,7 @@ function getIfTable() {
 
 /**
  * @version 1.0.0
- * 
+ *
  * @async
  * @function getIfEntry
  * @memberof winni#
@@ -80,7 +80,7 @@ function getIfTable() {
  *
  * @example
  * const { getAdaptersAddresses, getIfEntry } = require("@slimio/winni");
- * 
+ *
  * async function main() {
  *     const adapterAddr = await getAdaptersAddresses();
  *     for (const networkInterface of adapterAddr) {
@@ -105,7 +105,7 @@ function getIfEntry(ifIndex) {
 
 /**
  * @version 1.0.0
- * 
+ *
  * @async
  * @function getNumberOfInterfaces
  * @memberof winni#
@@ -114,7 +114,7 @@ function getIfEntry(ifIndex) {
  *
  * @example
  * const { getNumberOfInterfaces } = require("@slimio/winni");
- * 
+ *
  * async function main() {
  *     const nbrOfInterfaces = await getNumberOfInterfaces();
  *     console.log(`Number of interfaces on the local computer: ${nbrOfInterfaces}`);

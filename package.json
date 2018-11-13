@@ -12,6 +12,14 @@
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
+  "nyc": {
+    "check-coverage": true,
+    "per-file": false,
+    "lines": 98,
+    "statements": 98,
+    "functions": 98,
+    "branches": 90
+  },
   "scripts": {
     "test": "npx ava --verbose",
     "install": "npx node-gyp rebuild",

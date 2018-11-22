@@ -21,6 +21,7 @@
     "branches": 90
   },
   "scripts": {
+    "prepublish": "pkg-ok",
     "test": "ava --verbose",
     "prebuilds": "prebuildify --napi",
     "build": "cross-env node-gyp configure && node-gyp build",
@@ -60,6 +61,7 @@
     "jsdoc": "^3.5.5",
     "node-gyp": "^3.6.1",
     "nyc": "^13.1.0",
+    "pkg-ok": "^2.3.1",
     "prebuildify": "^2.9.1"
   }
 }

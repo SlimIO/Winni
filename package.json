@@ -42,8 +42,8 @@
   },
   "homepage": "https://github.com/SlimIO/winni#readme",
   "dependencies": {
-    "bindings": "^1.3.0",
-    "node-addon-api": "^1.4.0"
+    "node-addon-api": "^1.4.0",
+    "node-gyp-build": "^3.5.0"
   },
   "private": false,
   "gypfile": true,

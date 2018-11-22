@@ -2,7 +2,7 @@
  * @namespace winni
  * @desc Windows Network interfaces - Node.JS low level binding
  */
-const winni = require("bindings")("winni.node");
+const winni = require("node-gyp-build")(__dirname);
 
 /**
  * @version 1.0.0

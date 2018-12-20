@@ -34,8 +34,20 @@
     "type": "git",
     "url": "git+https://github.com/SlimIO/winni.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+      "SlimIO",
+      "Monitoring",
+      "Binding",
+      "NAPI",
+      "Interfaces",
+      "Network",
+      "Microsoft",
+      "Windows",
+      "IfEntry",
+      "IfTable",
+      "IfRow"
+  ],
+  "author": "SlimIO",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SlimIO/winni/issues"

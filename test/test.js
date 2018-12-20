@@ -121,8 +121,10 @@ test("getIfTable()", async function getIfTable(assert) {
 test("getIfEntry() - ifIndex should be typeof number", async function getIfEntry(assert) {
     assert.true(Reflect.has(winni, "getIfEntry"));
 
-    const error = await assert.throws(winni.getIfEntry("hello"), Error);
-    assert.is(error.message, "argument ifIndex should be typeof number!");
+    await assert.throwsAsync(winni.getIfEntry("hello"), {
+        instanceOf: Error,
+        message: "argument ifIndex should be typeof number!"
+    });
 });
 
 test("getIfEntry()", async function getIfEntry(assert) {

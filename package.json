@@ -35,17 +35,17 @@
     "url": "git+https://github.com/SlimIO/winni.git"
   },
   "keywords": [
-      "SlimIO",
-      "Monitoring",
-      "Binding",
-      "NAPI",
-      "Interfaces",
-      "Network",
-      "Microsoft",
-      "Windows",
-      "IfEntry",
-      "IfTable",
-      "IfRow"
+    "SlimIO",
+    "Monitoring",
+    "Binding",
+    "NAPI",
+    "Interfaces",
+    "Network",
+    "Microsoft",
+    "Windows",
+    "IfEntry",
+    "IfTable",
+    "IfRow"
   ],
   "author": "SlimIO",
   "license": "MIT",
@@ -55,7 +55,7 @@
   "homepage": "https://github.com/SlimIO/winni#readme",
   "dependencies": {
     "node-addon-api": "^1.6.2",
-    "node-gyp-build": "^3.5.0"
+    "node-gyp-build": "^3.6.0"
   },
   "private": false,
   "gypfile": true,

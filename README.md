@@ -144,7 +144,7 @@ Retrieves the number of interfaces on the local computer.
 
 Before building the project, be sure to get the following npm package installed:
 
-- Install (or upgrade to) NodeJS v10+ and npm v6+
+- Install (or upgrade to) Node.js v10+ and npm v6+
 - [Windows build tools](https://www.npmjs.com/package/windows-build-tools)
 
 Then, just run normal npm install command:

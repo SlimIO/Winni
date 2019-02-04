@@ -1,5 +1,6 @@
 # Winni
 ![V1.1](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![N-API](https://img.shields.io/badge/N--API-v3-green.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Winni/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Queue/blob/master/LICENSE)
 ![2DEP](https://img.shields.io/badge/Dependencies-2-yellow.svg)

@@ -1,8 +1,9 @@
 # Winni
+![V1.1](https://img.shields.io/badge/version-1.1.0-blue.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Winni/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Queue/blob/master/LICENSE)
-![V1.0](https://img.shields.io/badge/version-1.1.0-blue.svg)
-![N-API](https://img.shields.io/badge/N--API-experimental-orange.svg)
+![2DEP](https://img.shields.io/badge/Dependencies-2-yellow.svg)
+[![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Winni/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Winni?targetFile=package.json)
 
 SlimIO Windows Network Interfaces which expose low-level Microsoft APIs on Network Interfaces, Adapter Addresses and IF_ROW.
 

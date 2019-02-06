@@ -17,7 +17,8 @@ This binding expose the following methods/struct:
 - [MIB_IFROW](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow)
 - [GetNumberOfInterfaces](https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getnumberofinterfaces)
 
-> !! All methods are fully Asynchronous !!
+## Requirements
+- Node.js v10 or higher
 
 ## Getting Started
 

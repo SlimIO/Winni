@@ -48,7 +48,9 @@ main().catch(console.error);
 
 ## API
 
-### getAdaptersAddresses(): Promise< NetworkInterface[] >
+<details><summary>getAdaptersAddresses(): Promise< NetworkInterface[] ></summary>
+<br />
+
 Retrieves the addresses associated with the adapters on the local computer.
 
 ```ts
@@ -89,8 +91,11 @@ export interface NetworkInterface {
     multicast: string[];
 }
 ```
+</details>
 
-### getIfEntry(IfIndex: number): Promise< IfEntry >
+<details><summary>getIfEntry(IfIndex: number): Promise< IfEntry ></summary>
+<br />
+
 Retrieves information for the specified interface on the local computer.
 
 ```ts
@@ -135,12 +140,19 @@ export interface IfEntry {
     outQLen: number;
 }
 ```
+</details>
 
-### getIfTable(): Promise< IfEntry[] >
+<details><summary>getIfTable(): Promise< IfEntry[] ></summary>
+<br />
+
 Retrieves the MIB-II interfaces table (which contain all ifRow of all interfaces).
+</details>
 
-### getNumberOfInterfaces(): Promise< number >
+<details><summary>getNumberOfInterfaces(): Promise< number ></summary>
+<br />
+
 Retrieves the number of interfaces on the local computer.
+</details>
 
 ## Contribution Guidelines
 To contribute to the project, please read the [code of conduct](https://github.com/SlimIO/Governance/blob/master/COC_POLICY.md) and the guide for [N-API compilation](https://github.com/SlimIO/Governance/blob/master/docs/native_addons.md).

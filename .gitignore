@@ -63,3 +63,5 @@ jsdoc/
 build/
 .vscode/
 prebuilds/
+.exe
+.obj

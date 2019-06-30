@@ -11,7 +11,7 @@ using namespace Slimio;
 
 /*
  * Complete list of Interfaces!
- * 
+ *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iptypes/ns-iptypes-_ip_adapter_addresses_lh
  */
@@ -21,7 +21,7 @@ class GetAdapterAddrWorker : public AsyncWorker {
         ~GetAdapterAddrWorker() {}
     private:
         vector<NetworkInterface> vInterfaces;
-        
+
         void Execute(){
             NetworkAdapters Adapters;
 
@@ -146,7 +146,7 @@ Value getAdaptersAddresses(const CallbackInfo& info) {
     // Execute worker
     Function cb = info[0].As<Function>();
     (new GetAdapterAddrWorker(cb))->Queue();
-    
+
     return env.Undefined();
 }
 
@@ -202,7 +202,7 @@ Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
 
 /*
  * The GetIfEntry2 function retrieves information for the specified interface on the local computer.
- * 
+ *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-getifentry2
  */
 class GetIfEntryWorker : public AsyncWorker {
@@ -212,7 +212,7 @@ class GetIfEntryWorker : public AsyncWorker {
     private:
         MIB_IF_ROW2 ifRow;
         NET_IFINDEX ifIndex;
-        
+
         void Execute(){
             SecureZeroMemory(&ifRow, sizeof(ifRow));
             ifRow.InterfaceIndex = ifIndex;
@@ -239,7 +239,7 @@ class GetIfEntryWorker : public AsyncWorker {
 
 /*
  * getIfEntry retrieves information for the specified interface on the local computer.
- * 
+ *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getifentry
  * @doc: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow
  */
@@ -270,13 +270,13 @@ Value getIfEntry(const CallbackInfo& info) {
     // Execute worker
     Function cb = info[1].As<Function>();
     (new GetIfEntryWorker(cb, ifIndex))->Queue();
-    
+
     return env.Undefined();
 }
 
 /*
  * Retrieves the MIB-II interface table.
- * 
+ *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-getiftable2
  */
 class GetIfTableWorker : public AsyncWorker {
@@ -285,7 +285,7 @@ class GetIfTableWorker : public AsyncWorker {
         ~GetIfTableWorker() {}
     private:
         PMIB_IF_TABLE2 ifTable;
-        
+
         void Execute(){
             if (GetIfTable2(&ifTable) != NO_ERROR) {
                 return SetError("Failed to retrieve ifTable");
@@ -335,13 +335,13 @@ Value getIfTable(const CallbackInfo& info) {
     // Execute worker
     Function cb = info[0].As<Function>();
     (new GetIfTableWorker(cb))->Queue();
-    
+
     return env.Undefined();
 }
 
 /*
  * Retrieves the number of interfaces on the local computer.
- * 
+ *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getnumberofinterfaces
  */
 class GetInterfaceNumberWorker : public AsyncWorker {
@@ -350,7 +350,7 @@ class GetInterfaceNumberWorker : public AsyncWorker {
         ~GetInterfaceNumberWorker() {}
     private:
         DWORD numInterfaces;
-        
+
         void Execute(){
             if (GetNumberOfInterfaces(&numInterfaces) != NO_ERROR) {
                 return SetError("Failed to retrieve the number of interfaces on the local computer!");
@@ -384,7 +384,7 @@ Value getNumberOfInterfaces(const CallbackInfo& info) {
     // Execute worker
     Function cb = info[0].As<Function>();
     (new GetInterfaceNumberWorker(cb))->Queue();
-    
+
     return env.Undefined();
 }
 

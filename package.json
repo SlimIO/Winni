@@ -47,6 +47,14 @@
     "IfTable",
     "IfRow"
   ],
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "include/*.h",
+    "src",
+    "winni.cpp",
+    "binding.gyp"
+  ],
   "author": "SlimIO",
   "license": "MIT",
   "bugs": {

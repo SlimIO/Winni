@@ -1,6 +1,8 @@
+"use strict";
+
 /**
  * @namespace winni
- * @desc Windows Network interfaces - Node.JS low level binding
+ * @description Windows Network interfaces - Node.JS low level binding
  */
 const winni = require("node-gyp-build")(__dirname);
 
@@ -10,8 +12,8 @@ const winni = require("node-gyp-build")(__dirname);
  * @async
  * @function getAdaptersAddresses
  * @memberof winni#
- * @desc Retrieves the addresses associated with the adapters on the local computer.
- * @return {Promise<Winni.NetworkInterface[]>}
+ * @description Retrieves the addresses associated with the adapters on the local computer.
+ * @returns {Promise<Winni.NetworkInterface[]>}
  *
  * @example
  * const { getAdaptersAddresses } = require("@slimio/winni");
@@ -42,8 +44,8 @@ function getAdaptersAddresses() {
  * @async
  * @function getIfTable
  * @memberof winni#
- * @desc Retrieves the MIB-II interfaces table
- * @return {Promise<Winni.IfEntry[]>}
+ * @description Retrieves the MIB-II interfaces table
+ * @returns {Promise<Winni.IfEntry[]>}
  *
  * @example
  * const { getIfTable } = require("@slimio/winni");
@@ -74,9 +76,9 @@ function getIfTable() {
  * @async
  * @function getIfEntry
  * @memberof winni#
- * @param {!Number} ifIndex Interface IfIndex
- * @desc Retrieves information for the specified interface on the local computer
- * @return {Promise<Winni.IfEntry>}
+ * @param {!number} ifIndex Interface IfIndex
+ * @description Retrieves information for the specified interface on the local computer
+ * @returns {Promise<Winni.IfEntry>}
  *
  * @example
  * const { getAdaptersAddresses, getIfEntry } = require("@slimio/winni");
@@ -109,8 +111,8 @@ function getIfEntry(ifIndex) {
  * @async
  * @function getNumberOfInterfaces
  * @memberof winni#
- * @desc Retrieves the number of interfaces on the local computer
- * @return {Promise<number>}
+ * @description Retrieves the number of interfaces on the local computer
+ * @returns {Promise<number>}
  *
  * @example
  * const { getNumberOfInterfaces } = require("@slimio/winni");

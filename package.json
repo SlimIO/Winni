@@ -4,7 +4,7 @@
   "description": "Windows Network Interfaces (winni)",
   "main": "winni.js",
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "husky": {
     "hooks": {

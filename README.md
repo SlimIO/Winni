@@ -1,11 +1,13 @@
 # Winni
 ![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/SlimIO/Winni/master/package.json&query=$.version&label=Version)
 ![N-API](https://img.shields.io/badge/N--API-v3-green.svg)
-[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Queue/blob/master/LICENSE)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SlimIO/Config/commit-activity)
+[![mit](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/SlimIO/Queue/blob/master/LICENSE)
 ![dep](https://img.shields.io/david/SlimIO/Winni.svg)
 ![size](https://img.shields.io/bundlephobia/min/@slimio/winni.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Winni/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Winni?targetFile=package.json)
-[![Build Status](https://travis-ci.com/SlimIO/Winni.svg?branch=master)](https://travis-ci.com/SlimIO/Winni) [![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Winni.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.com/SlimIO/Winni.svg?branch=master)](https://travis-ci.com/SlimIO/Winni)
+[![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Winni.svg)](https://greenkeeper.io/)
 
 SlimIO Windows Network Interfaces which expose low-level Microsoft APIs on Network Interfaces, Adapter Addresses and IF_ROW.
 

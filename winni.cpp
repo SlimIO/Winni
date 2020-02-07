@@ -5,8 +5,6 @@
 #include <sstream>
 #include  "slimio.h"
 
-using namespace Napi;
-using namespace std;
 using namespace Slimio;
 
 /*
@@ -15,12 +13,12 @@ using namespace Slimio;
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getadaptersaddresses
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iptypes/ns-iptypes-_ip_adapter_addresses_lh
  */
-class GetAdapterAddrWorker : public AsyncWorker {
+class GetAdapterAddrWorker : public Napi::AsyncWorker {
     public:
-        GetAdapterAddrWorker(Function& callback) : AsyncWorker(callback) {}
+        GetAdapterAddrWorker(Napi::Function& callback) : AsyncWorker(callback) {}
         ~GetAdapterAddrWorker() {}
     private:
-        vector<NetworkInterface> vInterfaces;
+        std::vector<NetworkInterface> vInterfaces;
 
         void Execute(){
             NetworkAdapters Adapters;
@@ -36,20 +34,20 @@ class GetAdapterAddrWorker : public AsyncWorker {
             }
         }
 
-        void OnError(const Error& e) {
+        void OnError(const Napi::Error& e) {
             DWORD errorCode = GetLastError();
-            stringstream error;
+            std::stringstream error;
             error << e.what();
             if (errorCode != 0) {
                 error << " - code (" << errorCode << ") - " << getLastErrorMessage();
             }
 
-            Callback().Call({String::New(Env(), error.str()), Env().Null()});
+            Callback().Call({Napi::String::New(Env(), error.str()), Env().Null()});
         }
 
         void OnOK() {
-            HandleScope scope(Env());
-            Array ret = Array::New(Env());
+            Napi::HandleScope scope(Env());
+            Napi::Array ret = Napi::Array::New(Env());
             size_t j;
 
             // Iterate throught interfaces
@@ -57,7 +55,7 @@ class GetAdapterAddrWorker : public AsyncWorker {
             for (size_t i = 0; i < vInterfaces.size(); i++) {
                 SecureZeroMemory(&Interface, sizeof(Interface));
                 Interface = vInterfaces[i];
-                Object oInterface = Object::New(Env());
+                Napi::Object oInterface = Napi::Object::New(Env());
                 ret[i] = oInterface;
 
                 /** Setup Properties */
@@ -90,33 +88,33 @@ class GetAdapterAddrWorker : public AsyncWorker {
                 oInterface.Set("dhcpv6ClientDuid", Interface.Dhcpv6ClientDuid);
                 oInterface.Set("ipv4Metric", Interface.Ipv4Metric);
                 oInterface.Set("ipv6Metric", Interface.Ipv6Metric);
-                Array ZoneIndices = Array::New(Env(), 16);
+                Napi::Array ZoneIndices = Napi::Array::New(Env(), 16);
                 for (j = 0; j < 16; j++) {
-                    ZoneIndices[j] = Number::New(Env(), Interface.ZoneIndices[j]);
+                    ZoneIndices[j] = Napi::Number::New(Env(), Interface.ZoneIndices[j]);
                 }
                 oInterface.Set("zoneIndices", ZoneIndices);
 
-                Array DnServer = Array::New(Env(), Interface.DnServer.size());
+                Napi::Array DnServer = Napi::Array::New(Env(), Interface.DnServer.size());
                 for (j = 0; j < Interface.DnServer.size(); j++) {
-                    DnServer[j] = String::New(Env(), Interface.DnServer.at(j));
+                    DnServer[j] = Napi::String::New(Env(), Interface.DnServer.at(j));
                 }
                 oInterface.Set("dnServer", DnServer);
 
-                Array Anycast = Array::New(Env(), Interface.Anycast.size());
+                Napi::Array Anycast = Napi::Array::New(Env(), Interface.Anycast.size());
                 for (j = 0; j < Interface.Anycast.size(); j++) {
-                    Anycast[j] = String::New(Env(), Interface.Anycast.at(j));
+                    Anycast[j] = Napi::String::New(Env(), Interface.Anycast.at(j));
                 }
                 oInterface.Set("anycast", Anycast);
 
-                Array Multicast = Array::New(Env(), Interface.Multicast.size());
+                Napi::Array Multicast = Napi::Array::New(Env(), Interface.Multicast.size());
                 for (j = 0; j < Interface.Multicast.size(); j++) {
-                    Multicast[j] = String::New(Env(), Interface.Multicast.at(j));
+                    Multicast[j] = Napi::String::New(Env(), Interface.Multicast.at(j));
                 }
                 oInterface.Set("multicast", Multicast);
 
-                Array Unicast = Array::New(Env(), Interface.Unicast.size());
+                Napi::Array Unicast = Napi::Array::New(Env(), Interface.Unicast.size());
                 for (j = 0; j < Interface.Unicast.size(); j++) {
-                    Unicast[j] = String::New(Env(), Interface.Unicast.at(j));
+                    Unicast[j] = Napi::String::New(Env(), Interface.Unicast.at(j));
                 }
                 oInterface.Set("unicast", Unicast);
             };
@@ -128,23 +126,20 @@ class GetAdapterAddrWorker : public AsyncWorker {
 /*
  * Complete list of Interfaces! (JavaScript Binding)
  */
-Value getAdaptersAddresses(const CallbackInfo& info) {
-    Env env = info.Env();
+Napi::Value getAdaptersAddresses(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    Napi::Function cb;
 
-    // Check argument length!
     if (info.Length() < 1) {
-        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
         return env.Null();
     }
-
-    // callback should be a Napi::Function
     if (!info[0].IsFunction()) {
-        Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // Execute worker
-    Function cb = info[0].As<Function>();
+    cb = info[0].As<Napi::Function>();
     (new GetAdapterAddrWorker(cb))->Queue();
 
     return env.Undefined();
@@ -154,8 +149,8 @@ Value getAdaptersAddresses(const CallbackInfo& info) {
  * Translate MIB_IF_ROW2 into Napi::Object
  * This method is used by getIfEntry and getIfTable binding
  */
-Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
-    Object ret = Object::New(env);
+Napi::Object translateIfRow(Napi::Env env, MIB_IF_ROW2 ifRow) {
+    Napi::Object ret = Napi::Object::New(env);
 
     size_t PhysicalAddrLen = (size_t) ifRow.PhysicalAddressLength;
     ret.Set("physicalAddress", PhysicalAddrLen != 0 ? byteSeqToString(ifRow.PhysicalAddress, PhysicalAddrLen) : "");
@@ -205,9 +200,9 @@ Object translateIfRow(Env env, MIB_IF_ROW2 ifRow) {
  *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-getifentry2
  */
-class GetIfEntryWorker : public AsyncWorker {
+class GetIfEntryWorker : public Napi::AsyncWorker {
     public:
-        GetIfEntryWorker(Function& callback, NET_IFINDEX ifIndex) : AsyncWorker(callback), ifIndex(ifIndex) {}
+        GetIfEntryWorker(Napi::Function& callback, NET_IFINDEX ifIndex) : AsyncWorker(callback), ifIndex(ifIndex) {}
         ~GetIfEntryWorker() {}
     private:
         MIB_IF_ROW2 ifRow;
@@ -218,7 +213,7 @@ class GetIfEntryWorker : public AsyncWorker {
             ifRow.InterfaceIndex = ifIndex;
             DWORD error = GetIfEntry2(&ifRow);
             if (error != NO_ERROR) {
-                stringstream errStr;
+                std::stringstream errStr;
                 errStr << "Failed to retrieve ifEntry for IfIndex id " << (DWORD) ifIndex;
                 if (error == ERROR_FILE_NOT_FOUND) {
                     errStr << " - ERROR_FILE_NOT_FOUND";
@@ -232,7 +227,7 @@ class GetIfEntryWorker : public AsyncWorker {
         }
 
         void OnOK() {
-            HandleScope scope(Env());
+            Napi::HandleScope scope(Env());
             Callback().Call({Env().Null(), translateIfRow(Env(), ifRow)});
         }
 };
@@ -243,32 +238,26 @@ class GetIfEntryWorker : public AsyncWorker {
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getifentry
  * @doc: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/api/ifmib/ns-ifmib-_mib_ifrow
  */
-Value getIfEntry(const CallbackInfo& info) {
-    Env env = info.Env();
+Napi::Value getIfEntry(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    Napi::Function cb;
+    NET_IFINDEX ifIndex;
 
-    // Check if there is less than one argument, if then throw a JavaScript exception
     if (info.Length() < 2) {
-        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
         return env.Null();
     }
-
-    // The first argument (ifIndex) should be typeof Napi::Number
     if (!info[0].IsNumber()) {
-        Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "argument ifIndex should be typeof number!").ThrowAsJavaScriptException();
         return env.Null();
     }
-
-    // Callback should be a Napi::Function
     if (!info[1].IsFunction()) {
-        Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // Retrieve ifIndex argument (casted as a double integer)
-    NET_IFINDEX ifIndex = (NET_IFINDEX) info[0].As<Number>().Int64Value();
-
-    // Execute worker
-    Function cb = info[1].As<Function>();
+    ifIndex = (NET_IFINDEX) info[0].As<Napi::Number>().Int64Value();
+    cb = info[1].As<Napi::Function>();
     (new GetIfEntryWorker(cb, ifIndex))->Queue();
 
     return env.Undefined();
@@ -279,9 +268,9 @@ Value getIfEntry(const CallbackInfo& info) {
  *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/netioapi/nf-netioapi-getiftable2
  */
-class GetIfTableWorker : public AsyncWorker {
+class GetIfTableWorker : public Napi::AsyncWorker {
     public:
-        GetIfTableWorker(Function& callback) : AsyncWorker(callback) {}
+        GetIfTableWorker(Napi::Function& callback) : AsyncWorker(callback) {}
         ~GetIfTableWorker() {}
     private:
         PMIB_IF_TABLE2 ifTable;
@@ -292,20 +281,20 @@ class GetIfTableWorker : public AsyncWorker {
             }
         }
 
-        void OnError(const Error& e) {
+        void OnError(const Napi::Error& e) {
             DWORD errorCode = GetLastError();
-            stringstream error;
+            std::stringstream error;
             error << e.what();
             if (errorCode != 0) {
                 error << " - code (" << errorCode << ") - " << getLastErrorMessage();
             }
 
-            Callback().Call({String::New(Env(), error.str()), Env().Null()});
+            Callback().Call({Napi::String::New(Env(), error.str()), Env().Null()});
         }
 
         void OnOK() {
-            HandleScope scope(Env());
-            Array ret = Array::New(Env());
+            Napi::HandleScope scope(Env());
+            Napi::Array ret = Napi::Array::New(Env());
             for (int i = 0; i < (int) ifTable->NumEntries; ++i) {
                 ret[i] = translateIfRow(Env(), ifTable->Table[i]);
             }
@@ -317,23 +306,20 @@ class GetIfTableWorker : public AsyncWorker {
 /*
  * Retrieves the MIB-II interfaces table. (JavaScript Binding)
  */
-Value getIfTable(const CallbackInfo& info) {
-    Env env = info.Env();
+Napi::Value getIfTable(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    Napi::Function cb;
 
-    // Check argument length!
     if (info.Length() < 1) {
-        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
         return env.Null();
     }
-
-    // callback should be a Napi::Function
     if (!info[0].IsFunction()) {
-        Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // Execute worker
-    Function cb = info[0].As<Function>();
+    cb = info[0].As<Napi::Function>();
     (new GetIfTableWorker(cb))->Queue();
 
     return env.Undefined();
@@ -344,9 +330,9 @@ Value getIfTable(const CallbackInfo& info) {
  *
  * @doc: https://docs.microsoft.com/en-us/windows/desktop/api/iphlpapi/nf-iphlpapi-getnumberofinterfaces
  */
-class GetInterfaceNumberWorker : public AsyncWorker {
+class GetInterfaceNumberWorker : public Napi::AsyncWorker {
     public:
-        GetInterfaceNumberWorker(Function& callback) : AsyncWorker(callback) {}
+        GetInterfaceNumberWorker(Napi::Function& callback) : AsyncWorker(callback) {}
         ~GetInterfaceNumberWorker() {}
     private:
         DWORD numInterfaces;
@@ -358,49 +344,43 @@ class GetInterfaceNumberWorker : public AsyncWorker {
         }
 
         void OnOK() {
-            HandleScope scope(Env());
-            Callback().Call({Env().Null(), Number::New(Env(), numInterfaces)});
+            Napi::HandleScope scope(Env());
+            Callback().Call({Env().Null(), Napi::Number::New(Env(), numInterfaces)});
         }
 };
 
 /*
  * Retrieves the number of interfaces on the local computer (JavaScript Binding).
  */
-Value getNumberOfInterfaces(const CallbackInfo& info) {
-    Env env = info.Env();
+Napi::Value getNumberOfInterfaces(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    Napi::Function cb;
 
-    // Check argument length!
     if (info.Length() < 1) {
-        Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "Wrong number of argument provided!").ThrowAsJavaScriptException();
         return env.Null();
     }
-
-    // callback should be a Napi::Function
     if (!info[0].IsFunction()) {
-        Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "argument callback should be a Function!").ThrowAsJavaScriptException();
         return env.Null();
     }
 
-    // Execute worker
-    Function cb = info[0].As<Function>();
+    cb = info[0].As<Napi::Function>();
     (new GetInterfaceNumberWorker(cb))->Queue();
 
     return env.Undefined();
 }
 
 /*
- * Initialize Node.JS addon binding exports
+ * Initialize Node.js addon binding exports
  */
-Object Init(Env env, Object exports) {
-
-    // Setup addon methods
-    exports.Set("getAdaptersAddresses", Function::New(env, getAdaptersAddresses));
-    exports.Set("getIfEntry", Function::New(env, getIfEntry));
-    exports.Set("getIfTable", Function::New(env, getIfTable));
-    exports.Set("getNumberOfInterfaces", Function::New(env, getNumberOfInterfaces));
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+    exports.Set("getAdaptersAddresses", Napi::Function::New(env, getAdaptersAddresses));
+    exports.Set("getIfEntry", Napi::Function::New(env, getIfEntry));
+    exports.Set("getIfTable", Napi::Function::New(env, getIfTable));
+    exports.Set("getNumberOfInterfaces", Napi::Function::New(env, getNumberOfInterfaces));
 
     return exports;
 }
 
-// Declare NATIVE API/ADDON
 NODE_API_MODULE(winni, Init)

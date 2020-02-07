@@ -12,13 +12,12 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
 #pragma comment(lib, "IPHLPAPI.lib")
 
 #define WORKING_BUFFER_SIZE 15000
 #define MAX_TRIES 3
-#define NI_MAXSERV    32
-#define NI_MAXHOST  1025
+#define NI_MAXSERV 32
+#define NI_MAXHOST 1025
 
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
@@ -31,12 +30,12 @@ struct NetworkInterface {
     char* DnsSuffix;
     char* Description;
     char* FriendlyName;
-    string PhysicalAddress = string("");
-    vector<string> DnServer;
-    vector<string> Unicast;
-    vector<string> Anycast;
-    vector<string> Multicast;
-    vector<string> Prefix;
+    std::string PhysicalAddress = std::string("");
+    std::vector<std::string> DnServer;
+    std::vector<std::string> Unicast;
+    std::vector<std::string> Anycast;
+    std::vector<std::string> Multicast;
+    std::vector<std::string> Prefix;
     ULONG ZoneIndices[16];
     char* Dhcpv6Server;
     double Flags;
@@ -54,10 +53,10 @@ struct NetworkInterface {
     double Ipv6OtherStatefulConfig;
     double NetbiosOverTcpipEnabled;
     double Ipv6ManagedAddressConfigurationSupported;
-    string NetworkGuid;
+    std::string NetworkGuid;
     double ConnectionType;
     double TunnelType;
-    string Dhcpv6ClientDuid;
+    std::string Dhcpv6ClientDuid;
     ULONG Ipv4Metric;
     ULONG Ipv6Metric;
 };
@@ -83,12 +82,12 @@ class NetworkAdapters {
     public:
         NetworkAdapters();
         bool Initialize();
-        bool GetInterfaces(vector<NetworkInterface> *vInterfaces);
+        bool GetInterfaces(std::vector<NetworkInterface> *vInterfaces);
 
     private:
         PIP_ADAPTER_ADDRESSES pAddresses;
         DWORD dwRetVal;
-        
+
 };
 
 #endif // NETWORKADAPTERS_H

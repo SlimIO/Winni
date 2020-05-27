@@ -7,7 +7,6 @@
 ![size](https://img.shields.io/bundlephobia/min/@slimio/winni.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/SlimIO/Winni/badge.svg?targetFile=package.json)](https://snyk.io/test/github/SlimIO/Winni?targetFile=package.json)
 [![Build Status](https://travis-ci.com/SlimIO/Winni.svg?branch=master)](https://travis-ci.com/SlimIO/Winni)
-[![Greenkeeper badge](https://badges.greenkeeper.io/SlimIO/Winni.svg)](https://greenkeeper.io/)
 
 SlimIO Windows Network Interfaces which expose low-level Microsoft APIs on Network Interfaces, Adapter Addresses and IF_ROW.
 

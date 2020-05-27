@@ -28,7 +28,9 @@
     "install": "node-gyp rebuild",
     "doc": "jsdoc -c ./jsdoc.json -r -R ./README.md -P ./package.json --verbose",
     "coverage": "codecov",
-    "report": "nyc report --reporter=html"
+    "report": "nyc report --reporter=html",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -63,7 +65,8 @@
   "homepage": "https://github.com/SlimIO/winni#readme",
   "dependencies": {
     "node-addon-api": "^3.0.0",
-    "node-gyp-build": "^4.2.2"
+    "node-gyp-build": "^4.2.2",
+    "snyk": "^1.330.2"
   },
   "private": false,
   "gypfile": true,
@@ -84,5 +87,6 @@
     "nyc": "^15.0.1",
     "pkg-ok": "^2.3.1",
     "prebuildify": "^4.0.0"
-  }
+  },
+  "snyk": true
 }
